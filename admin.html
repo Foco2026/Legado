@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#071728" />
+  <meta name="description" content="Área administrativa da Legado Barbearia." />
+  <title>Legado Barbearia | Administrador</title>
+  <link rel="icon" type="image/png" href="assets/favicon.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Playfair+Display:wght@500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="admin.css" />
+</head>
+<body class="admin-body">
+  <div class="ambient ambient-one"></div><div class="ambient ambient-two"></div>
+  <header class="site-header admin-header">
+    <a class="brand" href="index.html" aria-label="Legado Barbearia - site público"><img src="assets/logo.png" alt="Logo Legado Barbearia" /><span><strong>LEGADO</strong><small>ADMINISTRADOR</small></span></a>
+    <nav class="admin-header-actions"><a class="header-public-link" href="index.html">Ver site público</a><button class="button button-small button-secondary hidden" id="openAdminTutorial" type="button">Tutorial</button><button class="button button-small button-secondary hidden" id="logoutButton" type="button">Sair</button></nav>
+  </header>
+
+  <main>
+    <section class="auth-section" id="authView">
+      <div class="auth-card">
+        <div class="auth-brand"><img src="assets/logo.png" alt="Emblema da Legado Barbearia" /><span class="eyebrow">ÁREA RESTRITA</span><h1 id="authTitle">Primeiro acesso</h1><p id="authDescription">Crie o acesso administrativo deste dispositivo.</p></div>
+        <form id="setupForm" class="auth-form" novalidate>
+          <label><span>Nome do administrador</span><input id="setupName" type="text" placeholder="Ex.: Gilliel" autocomplete="name" required /></label>
+          <label><span>E-mail</span><input id="setupEmail" type="email" placeholder="admin@legado.com" autocomplete="email" required /></label>
+          <label><span>Crie uma senha</span><div class="password-field"><input id="setupPassword" type="password" minlength="6" placeholder="Mínimo de 6 caracteres" autocomplete="new-password" required /><button type="button" data-toggle-password="setupPassword">Mostrar</button></div></label>
+          <label><span>Confirme a senha</span><div class="password-field"><input id="setupPasswordConfirm" type="password" minlength="6" placeholder="Digite novamente" autocomplete="new-password" required /><button type="button" data-toggle-password="setupPasswordConfirm">Mostrar</button></div></label>
+          <button class="button auth-submit" type="submit">Criar acesso administrativo</button>
+        </form>
+        <form id="loginForm" class="auth-form hidden" novalidate>
+          <label><span>E-mail</span><input id="loginEmail" type="email" placeholder="Digite seu e-mail" autocomplete="username" required /></label>
+          <label><span>Senha</span><div class="password-field"><input id="loginPassword" type="password" placeholder="Digite sua senha" autocomplete="current-password" required /><button type="button" data-toggle-password="loginPassword">Mostrar</button></div></label>
+          <button class="button auth-submit" type="submit">Entrar no painel</button>
+        </form>
+        <p class="auth-message" id="authMessage" role="status"></p>
+        <p class="auth-warning">Esta versão funciona localmente. Login e dados ficam apenas neste navegador até a conexão com o Supabase.</p>
+      </div>
+    </section>
+
+    <section class="admin-app hidden" id="adminView">
+      <div class="admin-welcome">
+        <div><span class="eyebrow">PAINEL LEGADO</span><h1>Gestão da barbearia</h1><p>Olá, <strong id="adminNameLabel">Administrador</strong>. Tudo que precisa para organizar o dia está aqui.</p></div>
+        <div class="admin-date-card"><small>Hoje</small><strong id="todayLabel"></strong></div>
+      </div>
+
+      <div class="admin-command-bar" aria-label="Ações rápidas">
+        <button class="admin-command primary" type="button" data-create-booking><span>＋</span><div><strong>Novo agendamento</strong><small>Adicionar cliente manualmente</small></div></button>
+        <button class="admin-command" type="button" id="openPendingBookings"><span>✓</span><div><strong>Confirmar pendentes</strong><small><b id="pendingQuickCount">0</b> aguardando análise</small></div></button>
+        <button class="admin-command" type="button" data-open-panel="availability"><span>◷</span><div><strong>Bloquear horário</strong><small>Pausa, folga ou compromisso</small></div></button>
+        <a class="admin-command" href="index.html"><span>↗</span><div><strong>Visualizar site</strong><small>Ver como o cliente enxerga</small></div></a>
+      </div>
+
+      <div class="admin-mobile-nav">
+        <label><span>Área do painel</span><select id="adminPanelSelect" aria-label="Selecionar área do painel">
+          <option value="overview">Visão geral</option><option value="calendar">Calendário</option><option value="bookings">Agendamentos</option><option value="clients">Clientes</option><option value="services">Serviços</option><option value="portfolio">Portfólio</option><option value="testimonials">Avaliações</option><option value="availability">Horários</option><option value="reports">Relatórios</option><option value="settings">Configurações</option><option value="tutorial">Tutorial</option>
+        </select></label>
+        <button class="button button-small" type="button" data-create-booking>＋ Novo</button>
+      </div>
+
+      <div class="admin-layout">
+        <aside class="admin-sidebar" aria-label="Navegação administrativa">
+          <div class="admin-sidebar-profile"><img src="assets/logo.png" alt="" /><div><strong>Legado</strong><small>Painel administrativo</small></div></div>
+          <div class="admin-nav-group"><span class="admin-nav-title">Principal</span>
+            <button class="admin-nav-button active" type="button" data-panel-target="overview"><span>◈</span><div>Visão geral<small>Resumo do dia</small></div></button>
+            <button class="admin-nav-button" type="button" data-panel-target="calendar"><span>▦</span><div>Calendário<small>Dia, semana e mês</small></div></button>
+            <button class="admin-nav-button" type="button" data-panel-target="bookings"><span>▣</span><div>Agendamentos<small>Confirmar e editar</small></div><b class="admin-nav-badge" id="pendingNavBadge">0</b></button>
+            <button class="admin-nav-button" type="button" data-panel-target="clients"><span>♙</span><div>Clientes<small>Histórico e contato</small></div></button>
+          </div>
+          <div class="admin-nav-group"><span class="admin-nav-title">Conteúdo do site</span>
+            <button class="admin-nav-button" type="button" data-panel-target="services"><span>✂</span><div>Serviços<small>Preços, tempo e fotos</small></div></button>
+            <button class="admin-nav-button" type="button" data-panel-target="portfolio"><span>▧</span><div>Portfólio<small>Galeria de trabalhos</small></div></button>
+            <button class="admin-nav-button" type="button" data-panel-target="testimonials"><span>★</span><div>Avaliações<small>Feedbacks publicados</small></div></button>
+          </div>
+          <div class="admin-nav-group"><span class="admin-nav-title">Operação</span>
+            <button class="admin-nav-button" type="button" data-panel-target="availability"><span>◷</span><div>Horários<small>Expediente e bloqueios</small></div></button>
+            <button class="admin-nav-button" type="button" data-panel-target="reports"><span>↗</span><div>Relatórios<small>Resultados e faturamento</small></div></button>
+          </div>
+          <div class="admin-nav-group"><span class="admin-nav-title">Sistema</span>
+            <button class="admin-nav-button" type="button" data-panel-target="settings"><span>⚙</span><div>Configurações<small>Dados e backup</small></div></button>
+            <button class="admin-nav-button" type="button" data-panel-target="tutorial"><span>?</span><div>Tutorial<small>Aprenda a usar</small></div></button>
+          </div>
+          <a class="admin-nav-button admin-public-button" href="index.html"><span>↗</span><div>Abrir site<small>Área do cliente</small></div></a>
+        </aside>
+
+        <div class="admin-content">
+          <section class="admin-panel active" data-panel="overview">
+            <div class="panel-heading"><div><span class="eyebrow">RESUMO</span><h2>Visão geral</h2><p>Acompanhe rapidamente a movimentação da agenda.</p></div><button class="button button-small" type="button" data-create-booking>Novo agendamento</button></div>
+            <div class="stats-grid">
+              <article class="stat-card"><span>Hoje</span><strong id="statToday">0</strong><small>Atendimentos do dia</small></article>
+              <article class="stat-card"><span>Pendentes</span><strong id="statPending">0</strong><small>Aguardando confirmação</small></article>
+              <article class="stat-card"><span>Concluídos no mês</span><strong id="statCompleted">0</strong><small>Atendimentos finalizados</small></article>
+              <article class="stat-card"><span>Faturamento do mês</span><strong class="money-stat" id="statRevenue">R$ 0</strong><small>Somente concluídos</small></article>
+            </div>
+            <div class="overview-grid">
+              <article class="admin-card"><div class="card-heading"><div><span class="eyebrow">AGENDA DE HOJE</span><h3>Próximos clientes</h3></div><span class="live-dot">Atualizado</span></div><div class="today-bookings" id="todayBookings"></div></article>
+              <article class="admin-card quick-card"><span class="eyebrow">ATALHOS</span><h3>Organize a rotina</h3><p>Crie horários, bloqueie períodos e mantenha as informações atualizadas.</p><div class="quick-actions"><button type="button" data-create-booking>Novo agendamento <span>→</span></button><button type="button" data-open-panel="availability">Bloquear período <span>→</span></button><button type="button" data-open-panel="reports">Ver resultados <span>→</span></button><button type="button" data-open-panel="portfolio">Atualizar portfólio <span>→</span></button><button type="button" data-open-panel="settings">Fazer backup <span>→</span></button></div></article>
+            </div>
+          </section>
+
+          <section class="admin-panel" data-panel="calendar">
+            <div class="panel-heading calendar-heading"><div><span class="eyebrow">AGENDA VISUAL</span><h2>Calendário</h2><p>Alterne entre dia, semana e mês. Clique em um dia para abrir somente os agendamentos daquela data.</p></div><button class="button button-small" type="button" data-create-booking>Novo agendamento</button></div>
+            <div class="calendar-toolbar admin-card"><div class="calendar-nav"><button type="button" id="calendarPrev">←</button><button type="button" id="calendarToday">Hoje</button><button type="button" id="calendarNext">→</button></div><strong id="calendarPeriodLabel"></strong><div class="calendar-view-switch"><button class="active" type="button" data-calendar-view="day">Dia</button><button type="button" data-calendar-view="week">Semana</button><button type="button" data-calendar-view="month">Mês</button></div></div>
+            <div class="calendar-shell" id="calendarView"></div>
+          </section>
+
+          <section class="admin-panel" data-panel="bookings">
+            <div class="panel-heading"><div><span class="eyebrow">AGENDA</span><h2>Agendamentos</h2><p>Confirme, edite, conclua, cancele ou exclua os registros.</p></div><div class="heading-actions"><button class="button button-small button-secondary" type="button" id="exportBookings">Exportar CSV</button><button class="button button-small" type="button" data-create-booking>Novo</button></div></div>
+            <article class="booking-protection-notice"><span>✓</span><div><strong>Proteção contra horário duplicado</strong><p>Solicitações pendentes já reservam o horário. Ao confirmar, o sistema verifica novamente o mesmo profissional, data, duração e intervalo. Se houver concorrência, você escolhe qual cliente confirmar.</p></div></article>
+            <div class="filters-card"><label class="search-field"><span>Buscar cliente</span><input id="bookingSearch" type="search" placeholder="Nome, telefone, código ou serviço" /></label><label><span>Data</span><input id="bookingDateFilter" type="date" /></label><label><span>Status</span><select id="bookingStatusFilter"><option value="all">Todos</option><option value="pending">Pendente</option><option value="confirmed">Confirmado</option><option value="completed">Concluído</option><option value="cancelled">Cancelado</option><option value="no_show">Não compareceu</option></select></label><button class="button button-secondary clear-filter" id="clearBookingFilters" type="button">Limpar</button></div>
+            <div class="booking-table-card"><div class="booking-table" id="bookingTable"></div></div>
+          </section>
+
+          <section class="admin-panel" data-panel="clients">
+            <div class="panel-heading"><div><span class="eyebrow">RELACIONAMENTO</span><h2>Clientes</h2><p>Histórico agrupado pelo número de WhatsApp.</p></div></div>
+            <div class="filters-card clients-filter"><label class="search-field"><span>Buscar cliente</span><input id="clientSearch" type="search" placeholder="Nome ou WhatsApp" /></label><div class="client-summary"><span>Clientes cadastrados</span><strong id="clientsCount">0</strong></div></div>
+            <div class="clients-grid" id="clientsGrid"></div>
+          </section>
+
+          <section class="admin-panel" data-panel="services">
+            <div class="panel-heading"><div><span class="eyebrow">CATÁLOGO</span><h2>Serviços</h2><p>Defina duração numérica para o bloqueio inteligente da agenda.</p></div></div>
+            <div class="management-grid">
+              <form class="admin-card management-form" id="serviceForm" novalidate>
+                <input id="serviceId" type="hidden" />
+                <input id="serviceIconData" type="hidden" value="corte.webp" />
+                <div class="card-heading"><div><span class="eyebrow">CADASTRO</span><h3 id="serviceFormTitle">Novo serviço</h3></div></div>
+                <div class="service-icon-editor">
+                  <div class="service-icon-preview" id="serviceIconPreview"><img src="assets/corte.webp" alt="Prévia do ícone do serviço" /></div>
+                  <div class="service-icon-controls">
+                    <label><span>Ícone padrão</span><select id="serviceIconPreset"><option value="corte.webp">Tesoura</option><option value="barba.webp">Barba</option><option value="produtos.webp">Produtos</option><option value="agendamento.webp">Agenda</option></select></label>
+                    <label class="file-button media-file-button"><input id="serviceIconUpload" type="file" accept="image/png,image/jpeg,image/webp" /><span>Enviar outra imagem</span></label>
+                    <button class="icon-action" id="resetServiceIcon" type="button">Restaurar ícone padrão</button>
+                    <small>Use uma imagem quadrada. Ela será otimizada e salva junto com o serviço neste navegador.</small>
+                  </div>
+                </div>
+                <div class="admin-field-grid">
+                  <label class="full"><span>Nome do serviço</span><input id="serviceName" type="text" placeholder="Ex.: Corte degradê" required /></label>
+                  <label><span>Duração em minutos</span><input id="serviceDuration" type="number" min="5" step="5" placeholder="45" required /></label>
+                  <label><span>Valor em reais</span><input id="servicePrice" type="number" min="0" step="0.01" placeholder="50,00" /></label>
+                  <label class="toggle-label"><input id="serviceActive" type="checkbox" checked /><span>Serviço ativo no site</span></label>
+                  <label class="full"><span>Descrição</span><textarea id="serviceDescription" rows="4" placeholder="Descreva o atendimento"></textarea></label>
+                </div>
+                <div class="form-actions"><button class="button" type="submit">Salvar serviço</button><button class="button button-secondary hidden" id="cancelServiceEdit" type="button">Cancelar edição</button></div>
+              </form>
+              <div class="admin-card"><div class="card-heading"><div><span class="eyebrow">CATÁLOGO COMPLETO</span><h3>Lista de serviços</h3></div><strong class="count-pill" id="servicesCount">0</strong></div><div class="management-list" id="servicesList"></div></div>
+            </div>
+          </section>
+
+          <section class="admin-panel" data-panel="portfolio">
+            <div class="panel-heading"><div><span class="eyebrow">VITRINE DIGITAL</span><h2>Portfólio</h2><p>Cadastre as fotos e também todos os textos que vão aparecer para o cliente.</p></div><button class="button button-small button-secondary" type="button" id="resetPortfolioForm">Novo trabalho</button></div>
+
+            <form class="admin-card portfolio-section-copy-card" id="portfolioSectionTextForm">
+              <div class="card-heading"><div><span class="eyebrow">TEXTOS DA SEÇÃO</span><h3>Apresentação do portfólio</h3><p>Esses textos aparecem acima de todos os trabalhos no site.</p></div></div>
+              <div class="admin-field-grid">
+                <label class="full"><span>Título principal da seção</span><input id="portfolioSectionTitleInput" type="text" placeholder="Ex.: Trabalhos que carregam identidade." required /></label>
+                <label class="full"><span>Texto de apresentação</span><textarea id="portfolioSectionTextInput" rows="3" placeholder="Ex.: Conheça alguns estilos e resultados realizados na Legado."></textarea></label>
+              </div>
+              <button class="button button-small" type="submit">Salvar textos da seção</button>
+            </form>
+
+            <div class="management-grid portfolio-management-grid">
+              <form class="admin-card management-form" id="portfolioForm">
+                <div class="card-heading"><div><span class="eyebrow">NOVO TRABALHO</span><h3 id="portfolioFormTitle">Adicionar trabalho</h3><p>Primeiro escreva as informações; depois escolha as fotos.</p></div></div>
+                <input id="portfolioId" type="hidden" />
+                <input id="portfolioImageData" type="hidden" />
+
+                <div class="portfolio-form-block portfolio-text-block">
+                  <div class="portfolio-block-heading"><span>01</span><div><strong>Textos do trabalho</strong><small>O título e a legenda aparecem no card. O texto completo aparece quando a pessoa abre.</small></div></div>
+                  <label><span>Nome do corte ou trabalho</span><input id="portfolioTitleInput" type="text" placeholder="Ex.: Degradê com acabamento" required /></label>
+                  <div class="admin-field-grid">
+                    <label><span>Categoria</span><input id="portfolioCategoryInput" type="text" list="portfolioCategories" placeholder="Cortes" required /><datalist id="portfolioCategories"><option value="Cortes"><option value="Barba"><option value="Corte + Barba"><option value="Finalização"><option value="Sobrancelha"><option value="Experiência"><option value="Ambiente"></datalist></label>
+                    <label><span>Ordem de exibição</span><input id="portfolioOrderInput" type="number" min="1" value="1" /></label>
+                  </div>
+                  <label><span>Legenda curta do card</span><textarea id="portfolioSummaryInput" rows="2" maxlength="160" placeholder="Ex.: Degradê baixo com acabamento natural e alinhamento preciso."></textarea><small class="field-help">Texto curto que aparece logo abaixo do título.</small></label>
+                  <label><span>Texto completo do trabalho</span><textarea id="portfolioDescriptionInput" rows="5" placeholder="Conte como foi feito, o estilo escolhido, acabamento e resultado final."></textarea><small class="field-help">Esse texto aparece quando o cliente abre as fotos.</small></label>
+                  <label><span>Descrição da imagem para Google e acessibilidade</span><input id="portfolioAltInput" type="text" placeholder="Ex.: Corte degradê masculino realizado na Legado Barbearia" /></label>
+                </div>
+
+                <div class="portfolio-form-block portfolio-media-block">
+                  <div class="portfolio-block-heading"><span>02</span><div><strong>Fotos do trabalho</strong><small>Escolha uma capa e acrescente quantas fotos precisar.</small></div></div>
+                  <div class="media-upload-preview" id="portfolioImagePreview"><img src="assets/corte.webp" alt="Prévia da imagem" /></div>
+                  <label class="button button-secondary file-button media-file-button">Escolher foto de capa<input id="portfolioImage" type="file" accept="image/jpeg,image/png,image/webp" /></label>
+                  <label class="button button-secondary file-button media-file-button">Adicionar mais fotos<input id="portfolioGalleryImages" type="file" accept="image/jpeg,image/png,image/webp" multiple /></label>
+                  <small class="upload-hint">A foto de capa aparece na grade. As outras ficam disponíveis quando o cliente abre o trabalho.</small>
+                  <div class="portfolio-gallery-editor" id="portfolioGalleryEditor"></div>
+                </div>
+
+                <div class="portfolio-form-block portfolio-publish-block">
+                  <div class="portfolio-block-heading"><span>03</span><div><strong>Publicação</strong><small>Escolha como o trabalho será exibido.</small></div></div>
+                  <label class="toggle-label"><input id="portfolioFeaturedInput" type="checkbox" /><span>Destacar este trabalho</span></label>
+                  <label class="toggle-label"><input id="portfolioActiveInput" type="checkbox" checked /><span>Exibir no site</span></label>
+                </div>
+                <button class="button portfolio-save-button" type="submit">Salvar fotos e textos no portfólio</button>
+              </form>
+              <div class="admin-card">
+                <div class="card-heading"><div><span class="eyebrow">ITENS PUBLICADOS</span><h3>Galeria do site</h3><p>Clique em editar para trocar fotos ou escritas.</p></div><strong class="count-pill" id="portfolioCount">0</strong></div>
+                <div class="storage-meter"><div><span>Armazenamento local estimado</span><strong id="storageUsage">0 MB</strong></div><div class="storage-meter-track"><i id="storageUsageBar"></i></div><small>Até a integração com o Supabase, evite muitas fotos grandes.</small></div>
+                <div class="portfolio-admin-list" id="portfolioAdminList"></div>
+              </div>
+            </div>
+          </section>
+
+          <section class="admin-panel" data-panel="testimonials">
+            <div class="panel-heading"><div><span class="eyebrow">PROVA SOCIAL</span><h2>Avaliações</h2><p>Cadastre somente depoimentos reais autorizados pelos clientes.</p></div><button class="button button-small button-secondary" type="button" id="resetTestimonialForm">Novo depoimento</button></div>
+            <div class="management-grid">
+              <form class="admin-card management-form" id="testimonialForm">
+                <div class="card-heading"><div><span class="eyebrow">DEPOIMENTO</span><h3 id="testimonialFormTitle">Adicionar avaliação</h3></div></div>
+                <input id="testimonialId" type="hidden" />
+                <label><span>Nome do cliente</span><input id="testimonialName" type="text" placeholder="Ex.: Carlos M." required /></label>
+                <label><span>Serviço realizado</span><input id="testimonialService" type="text" placeholder="Ex.: Corte + Barba" /></label>
+                <label><span>Depoimento</span><textarea id="testimonialText" rows="5" maxlength="420" placeholder="Digite o feedback autorizado pelo cliente." required></textarea></label>
+                <div class="admin-field-grid"><label><span>Avaliação</span><select id="testimonialRating"><option value="5">5 estrelas</option><option value="4">4 estrelas</option><option value="3">3 estrelas</option><option value="2">2 estrelas</option><option value="1">1 estrela</option></select></label><label><span>Ordem</span><input id="testimonialOrder" type="number" min="1" value="1" /></label></div>
+                <label class="toggle-label"><input id="testimonialActive" type="checkbox" checked /><span>Exibir no site</span></label>
+                <button class="button" type="submit">Salvar avaliação</button>
+              </form>
+              <div class="admin-card"><div class="card-heading"><div><span class="eyebrow">PUBLICAÇÃO</span><h3>Depoimentos cadastrados</h3></div><strong class="count-pill" id="testimonialsCount">0</strong></div><div class="testimonial-admin-list" id="testimonialAdminList"></div></div>
+            </div>
+          </section>
+
+          <section class="admin-panel" data-panel="availability">
+            <div class="panel-heading"><div><span class="eyebrow">DISPONIBILIDADE</span><h2>Horários de atendimento</h2><p>Configure expediente, intervalo, antecedência e bloqueios.</p></div></div>
+            <form class="admin-card schedule-form" id="availabilityForm">
+              <div class="card-heading"><div><span class="eyebrow">GRADE SEMANAL</span><h3>Expediente por dia</h3></div></div>
+              <div class="schedule-table"><div class="schedule-row schedule-header"><span>Dia</span><span>Aberto</span><span>Primeiro período</span><span>Segundo período</span></div><div id="weekdayRows"></div></div>
+              <div class="availability-options"><label><span>Intervalo da grade</span><select id="slotInterval"><option value="10">10 minutos</option><option value="15">15 minutos</option><option value="20">20 minutos</option><option value="30">30 minutos</option></select></label><label><span>Intervalo após atendimento</span><input id="bufferMinutes" type="number" min="0" step="5" /></label><label><span>Agendar com até</span><input id="advanceDays" type="number" min="1" max="180" /></label><label><span>Antecedência mínima</span><input id="minimumLeadMinutes" type="number" min="0" step="15" /></label><label><span>Prazo para cancelar/reagendar</span><input id="cancellationDeadlineMinutes" type="number" min="0" step="30" /></label></div>
+              <button class="button" type="submit">Salvar disponibilidade</button>
+            </form>
+            <div class="management-grid blocks-grid">
+              <form class="admin-card management-form" id="blockForm"><div class="card-heading"><div><span class="eyebrow">BLOQUEIO MANUAL</span><h3>Indisponibilizar período</h3></div></div><label><span>Data</span><input id="blockDate" type="date" required /></label><label class="toggle-label"><input id="blockAllDay" type="checkbox" /><span>Bloquear o dia inteiro</span></label><div class="admin-field-grid" id="blockTimeFields"><label><span>Início</span><input id="blockStart" type="time" value="12:00" /></label><label><span>Fim</span><input id="blockEnd" type="time" value="13:00" /></label></div><label><span>Motivo</span><input id="blockReason" type="text" placeholder="Ex.: compromisso externo" /></label><button class="button" type="submit">Adicionar bloqueio</button></form>
+              <div class="admin-card"><div class="card-heading"><div><span class="eyebrow">INDISPONIBILIDADES</span><h3>Próximos bloqueios</h3></div><strong class="count-pill" id="blockedCount">0</strong></div><div class="management-list" id="blockedSlotsList"></div></div>
+            </div>
+          </section>
+
+          <section class="admin-panel" data-panel="reports">
+            <div class="panel-heading"><div><span class="eyebrow">RESULTADOS</span><h2>Relatórios</h2><p>Os valores consideram apenas atendimentos marcados como concluídos.</p></div><button class="button button-small button-secondary" type="button" id="exportReport">Exportar período</button></div>
+            <div class="report-filters admin-card"><label><span>Data inicial</span><input id="reportStart" type="date" /></label><label><span>Data final</span><input id="reportEnd" type="date" /></label><button class="button button-secondary" type="button" id="applyReport">Atualizar</button></div>
+            <div class="stats-grid report-stats"><article class="stat-card"><span>Atendimentos</span><strong id="reportCompleted">0</strong><small>Concluídos</small></article><article class="stat-card"><span>Faturamento</span><strong class="money-stat" id="reportRevenue">R$ 0</strong><small>No período</small></article><article class="stat-card"><span>Ticket médio</span><strong class="money-stat" id="reportTicket">R$ 0</strong><small>Por atendimento</small></article><article class="stat-card"><span>Cancelamentos/faltas</span><strong id="reportCancelled">0</strong><small>No período</small></article></div>
+            <div class="reports-grid"><article class="admin-card"><div class="card-heading"><div><span class="eyebrow">SERVIÇOS</span><h3>Mais realizados</h3></div></div><div class="bar-report" id="servicesReport"></div></article><article class="admin-card"><div class="card-heading"><div><span class="eyebrow">HORÁRIOS</span><h3>Mais procurados</h3></div></div><div class="bar-report" id="timesReport"></div></article><article class="admin-card"><div class="card-heading"><div><span class="eyebrow">DIAS DA SEMANA</span><h3>Movimento</h3></div></div><div class="bar-report" id="weekdaysReport"></div></article><article class="admin-card"><div class="card-heading"><div><span class="eyebrow">STATUS</span><h3>Distribuição</h3></div></div><div class="bar-report" id="statusReport"></div></article></div>
+          </section>
+
+          <section class="admin-panel" data-panel="tutorial">
+            <div class="panel-heading"><div><span class="eyebrow">CENTRAL DE AJUDA</span><h2>Tutorial do administrador</h2><p>Use esta página como guia para configurar, publicar e administrar a Legado.</p></div><button class="button button-small" type="button" id="finishAdminTutorial">Concluir e ir para o início</button></div>
+
+            <article class="admin-card admin-tutorial-welcome">
+              <div><span class="eyebrow">COMECE POR AQUI</span><h3>Deixe o site pronto em poucos passos</h3><p>Os itens abaixo são verificados com os dados salvos neste navegador. Clique em qualquer etapa para abrir a área correspondente.</p></div>
+              <div class="tutorial-progress-summary"><strong id="tutorialProgressLabel">0 de 5</strong><span>etapas preparadas</span><div class="tutorial-progress-track"><i id="tutorialProgressBar"></i></div></div>
+            </article>
+
+            <div class="admin-tutorial-checklist" id="adminTutorialChecklist"></div>
+
+            <div class="panel-heading tutorial-subheading"><div><span class="eyebrow">COMO USAR CADA ÁREA</span><h2>O que fazer em cada aba</h2><p>Um resumo prático das ferramentas disponíveis no painel.</p></div></div>
+            <div class="admin-tutorial-grid">
+              <article class="admin-tutorial-card"><span>01</span><div><small>VISÃO GERAL</small><h3>Veja o dia rapidamente</h3><p>Acompanhe atendimentos de hoje, pendências, concluídos e faturamento mensal.</p><button type="button" data-open-panel="overview">Abrir visão geral →</button></div></article>
+              <article class="admin-tutorial-card"><span>02</span><div><small>CALENDÁRIO</small><h3>Organize a agenda visual</h3><p>Alterne entre dia, semana e mês. Clique em uma data para abrir a agenda daquele dia; depois use “Ver detalhes / editar” no atendimento desejado.</p><button type="button" data-open-panel="calendar">Abrir calendário →</button></div></article>
+              <article class="admin-tutorial-card"><span>03</span><div><small>AGENDAMENTOS</small><h3>Confirme e proteja os horários</h3><p>As solicitações pendentes já bloqueiam o horário. Use “Confirmar” para validar o atendimento; o sistema impede duas confirmações para o mesmo profissional e período.</p><button type="button" data-open-panel="bookings">Abrir agendamentos →</button></div></article>
+              <article class="admin-tutorial-card"><span>04</span><div><small>SERVIÇOS</small><h3>Cadastre o que é oferecido</h3><p>Informe nome, preço, duração, descrição e imagem do ícone de cada serviço.</p><button type="button" data-open-panel="services">Abrir serviços →</button></div></article>
+              <article class="admin-tutorial-card"><span>05</span><div><small>PORTFÓLIO</small><h3>Publique trabalhos reais</h3><p>Preencha título, legenda curta, texto completo, categoria e depois adicione uma capa e várias fotos por trabalho.</p><button type="button" data-open-panel="portfolio">Abrir portfólio →</button></div></article>
+              <article class="admin-tutorial-card"><span>06</span><div><small>AVALIAÇÕES</small><h3>Mostre feedbacks reais</h3><p>Cadastre nome, serviço, comentário, estrelas e publique apenas o que desejar.</p><button type="button" data-open-panel="testimonials">Abrir avaliações →</button></div></article>
+              <article class="admin-tutorial-card"><span>07</span><div><small>HORÁRIOS</small><h3>Defina quando pode agendar</h3><p>Configure expediente, intervalo, folgas e bloqueios de horários ou dias inteiros.</p><button type="button" data-open-panel="availability">Abrir horários →</button></div></article>
+              <article class="admin-tutorial-card"><span>08</span><div><small>RELATÓRIOS</small><h3>Acompanhe os resultados</h3><p>Consulte faturamento, serviços mais realizados, horários procurados e faltas.</p><button type="button" data-open-panel="reports">Abrir relatórios →</button></div></article>
+              <article class="admin-tutorial-card"><span>09</span><div><small>CONFIGURAÇÕES</small><h3>Personalize e faça backup</h3><p>Atualize contato, endereço, textos, foto, Pix, fidelidade, acesso e backup.</p><button type="button" data-open-panel="settings">Abrir configurações →</button></div></article>
+            </div>
+
+            <div class="admin-tutorial-routine">
+              <article class="admin-card"><span class="eyebrow">ROTINA DIÁRIA</span><h3>Antes de começar o atendimento</h3><ol><li>Abra a <strong>Visão geral</strong> e confira os clientes do dia.</li><li>Abra <strong>Agendamentos</strong>, fale com o cliente e clique em <strong>Confirmar</strong>. O sistema refaz a verificação de conflito antes de liberar a confirmação.</li><li>Bloqueie rapidamente qualquer período que não estará disponível.</li><li>Ao terminar, marque o atendimento como <strong>Concluído</strong>.</li></ol></article>
+              <article class="admin-card"><span class="eyebrow">SEGURANÇA DOS DADOS</span><h3>Faça backup regularmente</h3><p>Até a conexão com o Supabase, os dados ficam neste navegador. Baixe um backup depois de mudanças importantes e guarde o arquivo em local seguro.</p><button class="button button-secondary" type="button" data-open-panel="settings">Ir para backup</button></article>
+            </div>
+          </section>
+
+          <section class="admin-panel" data-panel="settings">
+            <div class="panel-heading"><div><span class="eyebrow">PERSONALIZAÇÃO</span><h2>Configurações</h2><p>Atualize o site, o acesso e mantenha uma cópia dos dados.</p></div></div>
+            <div class="management-grid">
+              <form class="admin-card management-form" id="businessSettingsForm"><div class="card-heading"><div><span class="eyebrow">DADOS DO NEGÓCIO</span><h3>Informações públicas</h3></div></div><div class="admin-field-grid"><label class="full"><span>Profissional principal</span><input id="settingProfessional" type="text" required /></label><label class="full"><span>Profissionais da agenda <small>(um por linha)</small></span><textarea id="settingBarbers" rows="4" placeholder="Gilliel Glaydson&#10;Outro barbeiro"></textarea></label><label><span>WhatsApp somente números</span><input id="settingWhatsappNumber" type="text" inputmode="numeric" required /></label><label><span>WhatsApp para exibição</span><input id="settingDisplayPhone" type="text" required /></label><label><span>Instagram</span><input id="settingInstagram" type="text" /></label><label><span>Link do Instagram</span><input id="settingInstagramUrl" type="url" /></label><label><span>Cidade</span><input id="settingCity" type="text" /></label><label class="full"><span>Endereço</span><input id="settingAddress" type="text" /></label><label><span>Dias exibidos</span><input id="settingBusinessDays" type="text" /></label><label><span>Horário exibido</span><input id="settingBusinessHours" type="text" /></label><label class="full"><span>Mensagem após o agendamento</span><textarea id="settingBookingMessage" rows="3"></textarea></label><label class="full"><span>Política de cancelamento</span><textarea id="settingCancellationPolicy" rows="3"></textarea></label><label class="full"><span>Link do Google Maps</span><input id="settingGoogleMapsUrl" type="url" placeholder="https://maps.google.com/..." /></label><div class="settings-divider full"><span>Apresentação e portfólio</span></div><label class="full"><span>Título da seção Sobre</span><input id="settingAboutTitle" type="text" /></label><label class="full"><span>Texto sobre a barbearia</span><textarea id="settingAboutText" rows="4"></textarea></label><label class="full"><span>Biografia do profissional</span><textarea id="settingProfessionalBio" rows="4"></textarea></label><label class="full"><span>Título do portfólio</span><input id="settingPortfolioTitle" type="text" /></label><label class="full"><span>Descrição do portfólio</span><textarea id="settingPortfolioText" rows="3"></textarea></label><label class="full"><span>Título das avaliações</span><input id="settingTestimonialsTitle" type="text" /></label><label class="full"><span>Descrição das avaliações</span><textarea id="settingTestimonialsText" rows="3"></textarea></label><div class="settings-divider full"><span>Foto do profissional</span></div><div class="profile-photo-editor full"><div class="profile-photo-preview"><img id="settingProfessionalPhotoPreview" src="assets/gilliel-apresentacao.webp" alt="Prévia da foto profissional" /></div><div><label class="button button-secondary file-button">Escolher foto<input id="settingProfessionalPhotoFile" type="file" accept="image/jpeg,image/png,image/webp" /></label><button class="danger-link" id="removeProfessionalPhoto" type="button">Usar logo como foto</button><input id="settingProfessionalPhoto" type="hidden" /></div></div><div class="settings-divider full"><span>Sinal por Pix</span></div><label class="toggle-label full"><input id="settingDepositEnabled" type="checkbox" /><span>Exibir instruções de sinal após o agendamento</span></label><label><span>Valor do sinal</span><input id="settingDepositAmount" type="number" min="0" step="0.01" /></label><label><span>Chave Pix</span><input id="settingPixKey" type="text" /></label><label class="full"><span>Mensagem sobre o sinal</span><textarea id="settingDepositMessage" rows="3"></textarea></label><div class="settings-divider full"><span>Fidelidade</span></div><label class="toggle-label full"><input id="settingLoyaltyEnabled" type="checkbox" /><span>Exibir progresso de fidelidade no cadastro dos clientes</span></label><label><span>Meta de atendimentos</span><input id="settingLoyaltyGoal" type="number" min="1" max="100" /></label><label><span>Benefício</span><input id="settingLoyaltyReward" type="text" /></label><label class="toggle-label full"><input id="settingShowPrices" type="checkbox" /><span>Exibir preços no site</span></label></div><button class="button" type="submit">Salvar informações</button></form>
+              <div class="settings-stack">
+                <form class="admin-card management-form" id="credentialsForm"><div class="card-heading"><div><span class="eyebrow">SEGURANÇA LOCAL</span><h3>Acesso administrativo</h3></div></div><label><span>Nome do administrador</span><input id="credentialName" type="text" required /></label><label><span>E-mail</span><input id="credentialEmail" type="email" required /></label><label><span>Nova senha <small>(deixe vazio para manter)</small></span><div class="password-field"><input id="credentialPassword" type="password" minlength="6" /><button type="button" data-toggle-password="credentialPassword">Mostrar</button></div></label><label><span>Confirmar nova senha</span><div class="password-field"><input id="credentialPasswordConfirm" type="password" minlength="6" /><button type="button" data-toggle-password="credentialPasswordConfirm">Mostrar</button></div></label><button class="button" type="submit">Atualizar acesso</button><p class="security-note">A proteção local não substitui autenticação segura em banco de dados.</p></form>
+                <article class="admin-card backup-card"><div class="card-heading"><div><span class="eyebrow">SEGURANÇA DOS DADOS</span><h3>Backup e restauração</h3></div></div><p>Exporte um arquivo com agendamentos, serviços, horários e configurações. Guarde-o em local seguro.</p><div class="form-actions"><button class="button" type="button" id="exportBackup">Baixar backup</button><label class="button button-secondary file-button">Restaurar backup<input id="importBackup" type="file" accept="application/json" /></label></div><button class="danger-link" type="button" id="resetDemoData">Apagar todos os dados deste navegador</button></article><article class="admin-card integration-card"><div class="card-heading"><div><span class="eyebrow">PRONTO PARA A PRÓXIMA ETAPA</span><h3>Integração com Supabase</h3></div><span class="integration-status">Preparado</span></div><p>O projeto inclui o modelo do banco, políticas de segurança e um guia para conectar agenda, login, portfólio e avaliações quando as credenciais forem informadas.</p><div class="integration-checklist"><span>✓ Estrutura SQL incluída</span><span>✓ Tabelas previstas</span><span>✓ Regras de acesso documentadas</span><span>✓ Dados locais exportáveis</span></div><a class="button button-secondary" href="SUPABASE-SETUP.md" download>Ver guia técnico</a></article>
+              </div>
+            </div>
+          </section>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <div class="modal admin-modal" id="bookingModal" aria-hidden="true"><div class="modal-backdrop" data-close-booking-modal></div><div class="modal-card booking-editor" role="dialog" aria-modal="true" aria-labelledby="bookingModalTitle"><button class="modal-close" type="button" data-close-booking-modal>×</button><span class="eyebrow">AGENDA</span><h2 id="bookingModalTitle">Novo agendamento</h2><form id="bookingEditorForm"><input id="editorBookingId" type="hidden" /><div class="admin-field-grid"><label class="full"><span>Cliente</span><input id="editorName" type="text" required /></label><label><span>WhatsApp</span><input id="editorPhone" type="tel" required /></label><label><span>Status</span><select id="editorStatus"><option value="pending">Pendente</option><option value="confirmed">Confirmado</option><option value="completed">Concluído</option><option value="cancelled">Cancelado</option><option value="no_show">Não compareceu</option></select></label><label class="full"><span>Serviço</span><select id="editorService" required></select></label><label><span>Data</span><input id="editorDate" type="date" required /></label><label><span>Horário</span><select id="editorTime" required></select></label><label class="full"><span>Profissional</span><input id="editorProfessional" type="text" list="barberOptions" required /><datalist id="barberOptions"></datalist></label><label class="full"><span>Observações</span><textarea id="editorNotes" rows="3"></textarea></label></div><div class="editor-summary" id="editorSummary"></div><div class="modal-actions"><button class="button" type="submit">Salvar agendamento</button><button class="button button-secondary" type="button" data-close-booking-modal>Cancelar</button></div></form></div></div>
+
+  <div class="admin-toast" id="adminToast" role="status"></div>
+  <script src="core.js"></script>
+    <script src="supabase-config.js"></script>
+  <script src="supabase-bridge.js"></script>
+<script src="admin.js"></script>
+</body>
+</html>
