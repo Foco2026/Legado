@@ -151,3 +151,9 @@
 .month-event.pending,.week-event.pending{border-left-color:var(--gold)}
 @media(max-width:900px){.calendar-day-overview{grid-template-columns:repeat(3,1fr)}.calendar-day-overview>.button{grid-column:1/-1}.calendar-booking{grid-template-columns:65px minmax(0,1fr) auto}.calendar-booking-actions{grid-column:1/-1}.calendar-booking-actions button{width:100%}}
 @media(max-width:560px){.calendar-day-overview{grid-template-columns:1fr}.calendar-day-overview>.button{grid-column:auto}.calendar-booking{grid-template-columns:58px minmax(0,1fr)}.calendar-booking>.status-badge{grid-column:1/-1;justify-self:start}.calendar-booking-actions{grid-column:1/-1}}
+
+/* Ajustes da seção de configurações: mantém contato e equipe organizados no desktop e celular. */
+#businessSettingsForm .settings-divider:first-of-type{margin-top:0;padding-top:0;border-top:0}
+#settingWhatsappNumber,#settingDisplayPhone{letter-spacing:.03em}
+#settingBarbers{min-height:96px;resize:vertical;line-height:1.55}
+@media(max-width:850px){#businessSettingsForm .settings-divider.full{grid-column:1/-1}#settingBarbers{min-height:88px}}
