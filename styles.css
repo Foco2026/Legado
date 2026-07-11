@@ -74,3 +74,32 @@
 @media(max-width:620px){.tutorial-steps{grid-template-columns:1fr}.tutorial-step{min-height:auto}.tutorial-callout{padding:22px}.tutorial-actions{display:grid;width:100%}.tutorial-actions .button{width:100%}}
 
 .confirmation-pending-note{margin:-8px 0 18px;color:#b8c5ce;font-size:10px;line-height:1.7;text-align:center}
+
+/* Ajuste final mobile: evita tela encolhida e deixa o site confortável no telefone. */
+@media(max-width:700px){
+  html,body{width:100%;max-width:100%;overflow-x:hidden}
+  body{font-size:16px}
+  .site-header{width:100%;min-width:0}
+  .brand{min-width:0}.brand strong{font-size:16px}.brand small{letter-spacing:.28em}
+  .hero,.section,.booking-section,.legal-page{width:100%;max-width:100%;padding-left:18px;padding-right:18px;margin-left:0;margin-right:0}
+  .hero{display:block;padding-top:44px}.hero-copy{text-align:left}.hero-copy h1{font-size:42px;line-height:1.02}.hero-copy>p{font-size:14px;line-height:1.7}
+  .hero-mark{min-height:240px}.hero-mark img{width:min(78vw,300px)}.logo-halo{width:min(82vw,330px)}
+  .section-heading h2,.booking-intro h2,.experience-card h2,.about-copy h2{font-size:34px;line-height:1.08}
+  .section-heading p,.booking-intro>p,.experience-card p,.about-copy>p{font-size:13px;line-height:1.7}
+  .services-grid,.about-section,.tutorial-steps,.visit-grid,.testimonials-grid,.faq-grid,.manage-grid,.field-grid,.choice-grid{grid-template-columns:1fr!important}
+  .about-media{min-height:auto}.about-photo-frame{width:100%;max-width:none;aspect-ratio:4/5}.about-photo-frame span{left:16px;right:16px;letter-spacing:.18em}
+  .professional-card{grid-template-columns:48px minmax(0,1fr)}.professional-monogram{width:48px;height:48px}
+  .booking-card{width:100%;max-width:100%;border-radius:18px}.steps{grid-template-columns:repeat(4,1fr);gap:6px;padding:14px 10px}.steps i{display:none}.step span{width:34px;height:34px}.form-step{padding:20px 14px}.form-title h3{font-size:24px}.form-title p{font-size:11px;line-height:1.5}
+  .date-strip{grid-template-columns:repeat(2,minmax(0,1fr));max-height:none;padding-right:0}.date-button,.time-button{min-height:72px}.time-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .date-picker-label{max-width:none}.field-grid input,.field-grid select,.field-grid textarea,.lookup-card input{min-height:48px;font-size:16px}
+  .form-footer{grid-template-columns:1fr;align-items:stretch}.summary-mini{grid-column:auto;grid-row:auto;font-size:11px;text-align:left}.form-footer .button{width:100%;min-height:48px;font-size:11px}
+  .portfolio-grid{grid-template-columns:1fr!important}.portfolio-card,.portfolio-card.featured{min-height:330px}.portfolio-card-content{left:16px;right:16px;bottom:17px}.portfolio-card-content h3{font-size:24px}.portfolio-footer,.testimonial-cta,.tutorial-callout{display:grid;align-items:stretch}.portfolio-footer .button,.testimonial-cta .button,.tutorial-actions .button{width:100%}
+  .portfolio-lightbox-card{width:100%;grid-template-columns:1fr}.portfolio-lightbox-media>img,.portfolio-lightbox-card>img{min-height:260px;height:40vh}.lightbox-thumbnails{overflow-x:auto;flex-wrap:nowrap}.lightbox-thumb{flex:0 0 56px}
+  .client-booking-head,.experience-card{display:grid}.client-booking-details{grid-template-columns:1fr!important}.client-actions,.modal-actions,.hero-actions,.about-actions,.experience-actions,.tutorial-actions{display:grid;grid-template-columns:1fr}.button{width:100%;min-height:48px}
+  .visit-card,.testimonial-card,.tutorial-step{min-height:auto;padding:20px}.floating-whatsapp{display:none}footer{grid-template-columns:1fr!important;padding-left:18px;padding-right:18px;padding-bottom:88px}
+  .modal{padding:10px}.modal-card{width:100%;border-radius:18px;padding:22px 16px}.toast{left:12px;right:12px;bottom:78px;max-width:none;font-size:11px}
+}
+@media(max-width:380px){
+  .hero-copy h1{font-size:36px}.section-heading h2,.booking-intro h2,.experience-card h2,.about-copy h2{font-size:30px}
+  .date-strip,.time-grid{grid-template-columns:1fr}.steps{padding-left:6px;padding-right:6px}.step span{width:30px;height:30px}
+}

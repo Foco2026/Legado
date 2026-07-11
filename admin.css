@@ -157,3 +157,22 @@
 #settingWhatsappNumber,#settingDisplayPhone{letter-spacing:.03em}
 #settingBarbers{min-height:96px;resize:vertical;line-height:1.55}
 @media(max-width:850px){#businessSettingsForm .settings-divider.full{grid-column:1/-1}#settingBarbers{min-height:88px}}
+/* Ajuste final mobile do painel: usa a largura real do telefone sem encolher a interface. */
+@media(max-width:700px){
+  html,body{width:100%;max-width:100%;overflow-x:hidden}
+  .admin-header{height:72px;padding-left:12px;padding-right:12px}.admin-header .brand{min-width:0}.admin-header .brand span{display:none}.admin-header-actions{gap:7px}.admin-header-actions .button{min-height:40px;padding:9px 10px;font-size:8px}
+  .auth-section{min-height:calc(100vh - 72px);padding:18px 12px}.auth-card{width:100%;padding:22px 16px;border-radius:18px}.auth-brand img{width:96px;height:96px}.auth-brand h1{font-size:31px}
+  .admin-app{width:100%;max-width:100%;padding:18px 12px 76px;margin:0}.admin-welcome{display:grid;gap:12px}.admin-welcome h1{font-size:32px;line-height:1.05}.admin-date-card{width:100%;min-width:0;text-align:left}
+  .admin-command-bar,.stats-grid,.overview-grid,.management-grid,.portfolio-management-grid,.reports-grid,.admin-field-grid,.availability-options,.clients-grid,.report-filters,.filters-card{grid-template-columns:1fr!important;width:100%;min-width:0}
+  .admin-command{min-height:auto;grid-template-columns:36px minmax(0,1fr);padding:12px}.admin-command small{font-size:8px}.admin-mobile-nav{top:72px;grid-template-columns:1fr;align-items:stretch;margin-left:0;margin-right:0}.admin-mobile-nav .button{width:100%;min-height:44px}
+  .panel-heading{display:grid;align-items:start}.panel-heading h2{font-size:30px;line-height:1.08}.panel-heading p{font-size:10px}.heading-actions{grid-template-columns:1fr!important}.heading-actions .button,.panel-heading>.button{width:100%;min-height:46px}
+  .admin-card,.filters-card,.booking-table-card,.calendar-shell{width:100%;min-width:0;border-radius:16px}.admin-card{padding:16px}.card-heading{display:grid;align-items:start}.card-heading h3{font-size:22px}
+  .auth-form input,.management-form input,.management-form select,.management-form textarea,.schedule-form input,.schedule-form select,.report-filters input,.filters-card input,.filters-card select,.booking-editor input,.booking-editor select,.booking-editor textarea{min-height:48px;font-size:16px}
+  #businessSettingsForm .settings-divider.full,.admin-field-grid .full{grid-column:auto!important}#settingBarbers{min-height:94px}
+  .booking-table{width:100%;min-width:0}.booking-row:not(.header){grid-template-columns:1fr!important;padding:15px}.booking-actions{display:grid!important;grid-template-columns:1fr 1fr;gap:7px}.booking-actions .icon-action{width:100%;min-width:0;min-height:38px}
+  .management-item,.service-management-item,.portfolio-admin-item,.calendar-booking{grid-template-columns:1fr!important}.management-actions{display:grid;grid-template-columns:1fr 1fr;width:100%;justify-content:stretch}.management-actions .icon-action{width:100%;min-height:38px}.service-management-icon{width:72px;height:72px}.portfolio-admin-item>img{width:100%;height:190px}.portfolio-admin-item .management-actions{max-width:none}
+  .profile-photo-editor,.service-icon-editor{grid-template-columns:1fr}.profile-photo-preview,.service-icon-preview{width:100%;max-width:none;height:auto;aspect-ratio:4/3}.integration-checklist{grid-template-columns:1fr}.form-actions{display:grid;grid-template-columns:1fr}.form-actions .button,.file-button{width:100%;min-height:46px}
+  .calendar-shell{overflow-x:auto}.calendar-day-overview{grid-template-columns:1fr!important}.calendar-booking-actions{grid-column:auto}.week-calendar,.month-calendar{min-width:720px}.calendar-toolbar{grid-template-columns:1fr;gap:10px}.calendar-nav,.calendar-view-switch{display:grid;grid-template-columns:1fr 1fr 1fr}.calendar-nav button,.calendar-view-switch button{min-height:40px}
+  .modal{padding:10px}.modal-card.booking-editor{width:100%;padding:20px 14px;border-radius:18px}.admin-toast{left:12px;right:12px;bottom:12px;max-width:none;font-size:11px}
+}
+@media(max-width:380px){.booking-actions,.management-actions{grid-template-columns:1fr}.admin-command{grid-template-columns:1fr}.calendar-nav,.calendar-view-switch{grid-template-columns:1fr}}
