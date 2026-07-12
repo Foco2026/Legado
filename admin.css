@@ -188,6 +188,15 @@
 .booking-row:not(.header){transition:transform .18s ease,border-color .18s ease,background .18s ease}
 .booking-row:not(.header):hover{transform:translateY(-1px);border-color:rgba(239,215,126,.28);background:rgba(215,180,74,.04)}
 .admin-mobile-nav{box-shadow:0 12px 34px rgba(0,0,0,.22)}
+.admin-help-strip,.admin-help-grid article{border:1px solid rgba(239,215,126,.22);background:linear-gradient(145deg,rgba(215,180,74,.07),rgba(4,16,27,.42));border-radius:15px}
+.admin-help-strip{display:grid;grid-template-columns:auto minmax(0,1fr);gap:12px;align-items:start;margin:-6px 0 18px;padding:13px 15px}
+.admin-help-strip span,.admin-help-grid strong{color:var(--gold-light);font-family:var(--serif)}
+.admin-help-strip span{font-size:17px;white-space:nowrap}
+.admin-help-strip p,.admin-help-grid p{margin:0;color:#aebbc5;font-size:8px;line-height:1.65}
+.admin-help-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:-6px 0 18px}
+.admin-help-grid.compact{grid-template-columns:repeat(3,minmax(0,1fr))}
+.admin-help-grid article{padding:13px 14px}
+.admin-help-grid strong{display:block;font-size:16px;margin-bottom:4px}
 
 @media(max-width:700px){
   .admin-command-bar{gap:9px}
@@ -201,4 +210,9 @@
   .calendar-booking-actions button{width:100%;min-height:38px}
   .booking-row:not(.header){border-radius:15px}
   .admin-tutorial-card,.tutorial-check-item{border-radius:14px}
+  .admin-help-strip{grid-template-columns:1fr;margin:0 0 12px;padding:12px}
+  .admin-help-strip span{font-size:16px}
+  .admin-help-strip p,.admin-help-grid p{font-size:9px}
+  .admin-help-grid,.admin-help-grid.compact{grid-template-columns:1fr;margin:0 0 12px;gap:8px}
+  .admin-help-grid article{padding:12px}
 }
