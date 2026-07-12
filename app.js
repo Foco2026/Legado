@@ -119,6 +119,31 @@
     $("#faqAddress").textContent = `${settings.address}, ${settings.city}.`;
   }
 
+  function renderBarbers() {
+    const grid = $("#barbersGrid");
+    if (!grid) return;
+    const names = Array.isArray(settings.barbers) && settings.barbers.length ? settings.barbers : [settings.professional];
+    const primary = settings.professional || names[0] || "Barbeiro Legado";
+    grid.innerHTML = names.map((name, index) => {
+      const isPrimary = String(name).trim().toLowerCase() === String(primary).trim().toLowerCase() || index === 0;
+      const photo = isPrimary ? (settings.professionalPhoto || "assets/gilliel-apresentacao.webp") : "assets/logo-192.png";
+      const initials = String(name || "LG").split(/\s+/).filter(Boolean).slice(0, 2).map(part => part[0]).join("").toUpperCase();
+      return `
+        <article class="barber-card reveal">
+          <div class="barber-photo">
+            <img src="${L.escapeHTML(photo)}" alt="${L.escapeHTML(name)}" loading="lazy" />
+            <span>${L.escapeHTML(initials || "LG")}</span>
+          </div>
+          <div>
+            <small>${isPrimary ? "RESPONSÁVEL PELA CASA" : "BARBEIRO LEGADO"}</small>
+            <h3>${L.escapeHTML(name)}</h3>
+            <p>${isPrimary ? L.escapeHTML(settings.professionalBio || "Atendimento cuidadoso, técnica e acabamento alinhado ao padrão Legado.") : "Atendimento com hora marcada, cuidado no acabamento e respeito ao estilo de cada cliente."}</p>
+          </div>
+        </article>`;
+    }).join("");
+    observeReveals();
+  }
+
   function portfolioCategories(items) {
     return ["Todos", ...new Set(items.map(item => item.category).filter(Boolean))];
   }
@@ -175,14 +200,21 @@
   function renderTestimonials() {
     const items = L.getTestimonials();
     const section = $("#avaliacoes");
-    if (section) section.classList.toggle("hidden", !items.length);
+    if (section) section.classList.remove("hidden");
+    $("#testimonialsEyebrow").textContent = settings.testimonialsEyebrow || "AVALIAÇÕES";
+    $("#testimonialsTitle").textContent = settings.testimonialsTitle || "Quem vive a experiência, recomenda.";
+    $("#testimonialsText").textContent = settings.testimonialsText || "Depoimentos reais dos clientes da Legado.";
     if (!items.length) {
-      $("#testimonialsGrid").innerHTML = "";
+      clearInterval(testimonialsTimer);
+      $("#testimonialsGrid").innerHTML = `
+        <article class="testimonial-card testimonial-invite reveal">
+          <div class="testimonial-stars" aria-label="Experiência Legado">★★★★★</div>
+          <blockquote>Atendimento com hora marcada, cuidado no acabamento e uma experiência pensada para você sair pronto para o próximo compromisso.</blockquote>
+          <div class="testimonial-author"><strong>Legado Barbearia</strong><span>Seu feedback também pode aparecer aqui</span></div>
+        </article>`;
+      observeReveals();
       return;
     }
-    $("#testimonialsEyebrow").textContent = settings.testimonialsEyebrow;
-    $("#testimonialsTitle").textContent = settings.testimonialsTitle;
-    $("#testimonialsText").textContent = settings.testimonialsText;
     $("#testimonialsGrid").innerHTML = items.map(item => `
       <article class="testimonial-card reveal">
         <div class="testimonial-stars" aria-label="${item.rating} de 5 estrelas">${"★".repeat(item.rating)}${"☆".repeat(5-item.rating)}</div>
@@ -192,7 +224,6 @@
     startTestimonialsCarousel();
     observeReveals();
   }
-
   function startTestimonialsCarousel() {
     const grid = $("#testimonialsGrid");
     clearInterval(testimonialsTimer);
@@ -360,8 +391,30 @@
     if (elements.professional.value) parts.push(elements.professional.value);
     if (state.time) parts.push(`${state.time}–${L.addMinutes(state.time, state.service.durationMinutes)}`);
     elements.summary.textContent = parts.length ? parts.join(" · ") : "Selecione um serviço para começar.";
+    renderBookingReview();
   }
 
+  function renderBookingReview() {
+    const review = $("#bookingReview");
+    if (!review) return;
+    if (!state.service || !state.date || !state.time) {
+      review.innerHTML = '<strong>Resumo do horário</strong><p>Escolha serviço, data e horário para revisar antes de confirmar.</p>';
+      return;
+    }
+    const professional = elements.professional.value || settings.professional;
+    const endTime = L.addMinutes(state.time, state.service.durationMinutes);
+    review.innerHTML = `
+      <div class="booking-review-head">
+        <span>HORÁRIO ESCOLHIDO</span>
+        <strong>${L.escapeHTML(state.time)} às ${L.escapeHTML(endTime)}</strong>
+      </div>
+      <div class="booking-review-grid">
+        <div><small>Serviço</small><b>${L.escapeHTML(state.service.name)}</b></div>
+        <div><small>Data</small><b>${L.escapeHTML(L.formatDate(state.date, { day: "2-digit", month: "short" }))}</b></div>
+        <div><small>Barbeiro</small><b>${L.escapeHTML(professional)}</b></div>
+        <div><small>Duração</small><b>${state.service.durationMinutes} min</b></div>
+      </div>`;
+  }
   function showInlineMessage(message) {
     const previous = elements.summary.textContent;
     elements.summary.textContent = message;
@@ -787,7 +840,7 @@
   function refreshData() {
     settings = L.getSettings(); services = L.getServices(); availability = L.getAvailability();
     if (state.serviceId) state.service = services.find(item => item.id === state.serviceId) || null;
-    applySettings(); buildPublicServices(); buildServiceChoices(); buildDates(); buildTimes(); updateSummary(); renderPortfolio(); renderTestimonials(); renderBusinessStatus();
+    applySettings(); buildPublicServices(); buildServiceChoices(); buildDates(); buildTimes(); updateSummary(); renderBarbers(); renderPortfolio(); renderTestimonials(); renderBusinessStatus();
   }
 
   window.addEventListener("storage", refreshData);
@@ -800,7 +853,7 @@
     window.addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
   }
 
-  applySettings(); buildPublicServices(); buildServiceChoices(); buildDates(); buildTimes(); renderPortfolio(); renderTestimonials(); goToStep(1); observeReveals();
+  applySettings(); buildPublicServices(); buildServiceChoices(); buildDates(); buildTimes(); renderBarbers(); renderPortfolio(); renderTestimonials(); goToStep(1); observeReveals();
 
   const query = new URLSearchParams(location.search);
   if (query.get("telefone") && query.get("codigo")) {
