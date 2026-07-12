@@ -747,13 +747,17 @@
   }
 
   const mobileBookingCta = $(".mobile-booking-cta");
+  const floatingWhatsapp = $("#floatingWhatsapp");
   const bookingSection = $("#agendar");
   function updateMobileCta() {
     if (!mobileBookingCta || !bookingSection) return;
     const box = bookingSection.getBoundingClientRect();
     const insideBooking = box.top < window.innerHeight * .72 && box.bottom > window.innerHeight * .28;
+    const beforeBooking = box.top > window.innerHeight * .24;
     const nearBottom = window.innerHeight + window.scrollY > document.documentElement.scrollHeight - 180;
-    mobileBookingCta.classList.toggle("is-hidden", insideBooking || nearBottom);
+    const hideFloatingActions = insideBooking || !beforeBooking || nearBottom;
+    mobileBookingCta.classList.toggle("is-hidden", hideFloatingActions);
+    if (floatingWhatsapp) floatingWhatsapp.classList.toggle("is-hidden", hideFloatingActions);
   }
   window.addEventListener("scroll", updateMobileCta, { passive: true });
   window.addEventListener("resize", updateMobileCta);

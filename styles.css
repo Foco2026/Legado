@@ -292,3 +292,41 @@ main{display:flex;flex-direction:column}
   .mobile-booking-cta{left:22px;right:22px;min-height:34px;font-size:8px;bottom:calc(8px + env(safe-area-inset-bottom))}
   .floating-whatsapp{width:42px;height:42px;bottom:calc(54px + env(safe-area-inset-bottom))}
 }
+
+/* Correção mobile da seção contato/localização */
+.floating-whatsapp.is-hidden{transform:translateY(calc(130% + env(safe-area-inset-bottom)));opacity:0;pointer-events:none}
+@media(max-width:720px){
+  .visit-section{padding-top:22px}
+  .visit-section .section-heading{margin-bottom:14px}
+  .visit-section .section-heading h2{font-size:27px}
+  .visit-section .section-heading p{display:none}
+  .visit-grid{gap:9px}
+  .visit-card{
+    min-height:0!important;
+    display:grid!important;
+    grid-template-columns:42px minmax(0,1fr)!important;
+    align-items:center!important;
+    gap:10px 12px!important;
+    padding:14px!important;
+    border-radius:16px!important;
+  }
+  .visit-card .visit-icon{grid-row:1/4;grid-column:1;width:42px;height:42px;margin:0}
+  .visit-card small,.visit-card h3,.visit-card p,.visit-card .text-link,.visit-card .visit-live-status{grid-column:2!important}
+  .visit-card small{font-size:6px;letter-spacing:.14em}
+  .visit-card h3{
+    font-size:18px!important;
+    line-height:1.12!important;
+    margin:0!important;
+    max-width:100%;
+    overflow-wrap:normal;
+    word-break:normal;
+  }
+  #visitPhone{font-size:17px!important;white-space:nowrap}
+  #visitAddress,#visitBusinessDays{white-space:normal}
+  .visit-card p{font-size:8px!important;line-height:1.35!important;margin:0!important}
+  .visit-card .text-link{font-size:9px;margin-top:2px}
+  .visit-live-status{width:100%;justify-content:center;white-space:normal;text-align:center;padding:8px 10px;font-size:6px;line-height:1.25}
+  .faq-section{padding-top:18px;padding-bottom:24px}
+  .faq-grid{gap:8px}.faq-grid summary{font-size:17px;line-height:1.2;padding:13px 28px 13px 0}
+  footer{padding-top:34px;padding-bottom:42px}
+}
