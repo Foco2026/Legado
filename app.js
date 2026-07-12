@@ -108,9 +108,11 @@
     settings = L.getSettings();
     const photo = $("#professionalPhoto");
     if (photo) { photo.src = settings.professionalPhoto || "assets/gilliel-apresentacao.webp"; photo.alt = `${settings.professional}, profissional da ${settings.businessName}`; }
-    $("#aboutEyebrow").textContent = settings.aboutEyebrow;
-    $("#aboutTitle").textContent = settings.aboutTitle;
-    $("#aboutText").textContent = settings.aboutText;
+    const oldTitle = "TradiÃ§Ã£o, tÃ©cnica e personalidade em cada detalhe.";
+    const oldText = "A Legado Barbearia nasceu para oferecer uma experiÃªncia completa: atendimento com hora marcada, ambiente sofisticado e cuidado pensado para valorizar o estilo de cada cliente.";
+    $("#aboutEyebrow").textContent = settings.aboutEyebrow === "CONHEÃ‡A A LEGADO" ? "NOSSA HISTÃ“RIA" : settings.aboutEyebrow;
+    $("#aboutTitle").textContent = settings.aboutTitle === oldTitle ? "Uma barbearia criada para deixar legado." : settings.aboutTitle;
+    $("#aboutText").textContent = settings.aboutText === oldText ? "A Legado nasceu em Mineiros com uma ideia simples: transformar o cuidado masculino em um momento de respeito, presenÃ§a e identidade. Cada corte, barba e acabamento carrega atenÃ§Ã£o aos detalhes, conversa boa e o compromisso de fazer o cliente sair se reconhecendo melhor no espelho." : settings.aboutText;
     $("#professionalName").textContent = settings.professional;
     $("#professionalBio").textContent = settings.professionalBio;
     $("#mapButton").href = settings.googleMapsUrl || `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${settings.address}, ${settings.city}`)}`;
