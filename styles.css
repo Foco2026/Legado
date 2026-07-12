@@ -447,3 +447,496 @@ main{display:flex;flex-direction:column}
   .portfolio-card .portfolio-open{width:32px;height:32px;right:10px;top:10px;font-size:14px}
   .portfolio-gallery-badge{left:10px;top:10px;font-size:6px;padding:5px 7px}
 }
+
+/* V26 - Direcao visual premium: mais alma, menos empilhamento */
+:root{
+  --v26-max:1160px;
+  --v26-gutter:clamp(14px,4vw,42px);
+  --v26-panel:rgba(7,25,40,.72);
+  --v26-panel-strong:linear-gradient(145deg,rgba(18,50,76,.9),rgba(5,16,27,.97));
+  --v26-border:rgba(239,215,126,.24);
+  --v26-soft-border:rgba(255,255,255,.075);
+}
+
+html{scroll-padding-top:86px}
+body{
+  background:
+    radial-gradient(circle at 18% -8%,rgba(39,78,113,.38),transparent 34%),
+    radial-gradient(circle at 88% 10%,rgba(221,181,64,.10),transparent 22%),
+    linear-gradient(180deg,#06131f 0%,#071a2a 46%,#040f19 100%);
+  color:#edf2f3;
+}
+.ambient{opacity:.18;filter:blur(52px)}
+main{display:flex;flex-direction:column}
+#inicio{order:1}
+#sobre{order:2}
+#barbeiros{order:3}
+#servicos{order:4}
+#portfolio{order:5}
+#agendar{order:6}
+#avaliacoes{order:7}
+#visite{order:8}
+#duvidas{order:9}
+#meus-horarios{order:10}
+.tutorial-section,.experience-section{display:none!important}
+.about-section{display:grid!important}
+.portfolio-section{display:block!important}
+.main-nav a[href="#como-usar"],
+.main-nav a[href="#meus-horarios"],
+.main-nav a[href="#duvidas"]{display:none!important}
+.main-nav a[href="#sobre"],
+.main-nav a[href="#portfolio"],
+.main-nav a[href="#barbeiros"],
+.main-nav a[href="#avaliacoes"]{display:inline-flex!important}
+
+.site-header{
+  height:72px;
+  padding-inline:clamp(14px,3vw,30px);
+  border-bottom:1px solid rgba(239,215,126,.14);
+  background:linear-gradient(180deg,rgba(4,15,25,.88),rgba(4,15,25,.64));
+}
+.brand{gap:11px}
+.brand img{width:48px;height:48px;object-fit:cover;border-radius:50%;box-shadow:0 0 0 1px rgba(239,215,126,.34)}
+.brand strong{font-size:18px;letter-spacing:.16em}
+.brand small{font-size:8px;letter-spacing:.32em;color:rgba(239,215,126,.78)}
+.main-nav{gap:3px}
+.main-nav a{border-radius:999px;padding:9px 11px;font-size:8px;letter-spacing:.10em}
+.main-nav a:is(:hover,.active){background:rgba(239,215,126,.11);color:var(--gold-light)}
+.business-status{min-height:32px;padding:8px 12px;font-size:7px}
+.header-cta{min-height:34px;padding:9px 13px;font-size:8px}
+
+.hero,.section,.booking-section{
+  width:min(var(--v26-max),calc(100% - 36px));
+  margin-inline:auto;
+  padding:clamp(34px,5.6vw,70px) 0;
+}
+.section-heading{
+  max-width:760px;
+  margin-bottom:clamp(18px,2.8vw,30px);
+}
+.section-heading h2,.booking-intro h2,.about-copy h2{
+  font-size:clamp(32px,4vw,54px);
+  line-height:1.02;
+  letter-spacing:0;
+}
+.section-heading p,.booking-intro>p,.about-copy>p{
+  color:#bdc8cf;
+  font-size:13px;
+  line-height:1.7;
+}
+.eyebrow{letter-spacing:.18em;color:var(--gold-light)}
+
+.hero{
+  min-height:auto;
+  display:grid;
+  grid-template-columns:minmax(0,1fr) minmax(260px,390px);
+  gap:clamp(24px,5vw,64px);
+  align-items:center;
+  padding-top:clamp(38px,7vw,86px);
+  position:relative;
+}
+.hero:before{
+  content:"";
+  position:absolute;
+  inset:18px -16px auto auto;
+  width:42%;
+  height:66%;
+  border:1px solid rgba(239,215,126,.13);
+  border-radius:34px;
+  pointer-events:none;
+  opacity:.7;
+}
+.hero-copy h1{
+  max-width:760px;
+  margin:12px 0 16px;
+  font-size:clamp(44px,7vw,84px);
+  line-height:.98;
+  letter-spacing:0;
+}
+.hero-copy h1 em{color:var(--gold-light)}
+.hero-copy>p{
+  max-width:560px;
+  font-size:15px;
+  line-height:1.75;
+  color:#c7d0d6;
+}
+.hero-actions{gap:10px;margin:24px 0 26px}
+.button{
+  border-radius:999px;
+  min-height:44px;
+  letter-spacing:.08em;
+  box-shadow:0 12px 34px rgba(196,154,45,.22);
+}
+.text-link{min-height:38px;align-items:center;color:#eef3f4}
+.trust-row{
+  max-width:760px;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:0;
+  border-top:1px solid rgba(239,215,126,.20);
+}
+.trust-row div{padding:15px 16px 0 0}
+.trust-row strong{font-size:14px;color:#fff}
+.trust-row span{font-size:9px;color:#9fabB4}
+.hero-mark{
+  min-height:390px;
+  display:grid;
+  place-items:center;
+  border:1px solid rgba(239,215,126,.18);
+  border-radius:36px;
+  background:linear-gradient(145deg,rgba(12,36,56,.78),rgba(2,10,18,.92));
+  overflow:hidden;
+}
+.hero-mark img{
+  width:min(78%,310px);
+  aspect-ratio:1;
+  border-radius:50%;
+  object-fit:cover;
+  filter:drop-shadow(0 22px 44px rgba(0,0,0,.42));
+  animation:logoFloat 5s ease-in-out infinite;
+}
+.hero-stamp{
+  bottom:22px;
+  right:24px;
+  border-color:rgba(239,215,126,.26);
+  background:rgba(3,13,22,.58);
+}
+@keyframes logoFloat{0%,100%{transform:translateY(0) scale(1)}50%{transform:translateY(-6px) scale(1.015)}}
+
+.about-section{
+  grid-template-columns:minmax(230px,.38fr) minmax(0,1fr)!important;
+  gap:clamp(22px,4vw,54px);
+  align-items:center;
+  padding-block:clamp(34px,5vw,62px)!important;
+  border-top:1px solid rgba(239,215,126,.12);
+  border-bottom:1px solid rgba(239,215,126,.10);
+}
+.about-photo-frame{
+  width:min(100%,292px)!important;
+  border-radius:32px!important;
+  aspect-ratio:4/5!important;
+  background:var(--v26-panel-strong);
+}
+.about-photo-frame:before{border-radius:26px!important}
+.about-photo-frame img{object-fit:cover;filter:saturate(1.04) contrast(1.04)}
+.about-copy{max-width:760px}
+.about-copy h2{max-width:700px;margin:10px 0 14px!important}
+.about-copy>p{max-width:720px!important}
+.professional-card{
+  max-width:620px!important;
+  margin-top:22px!important;
+  border-color:rgba(239,215,126,.20);
+  background:rgba(255,255,255,.035);
+}
+
+.barbers-section{padding-top:clamp(34px,5vw,60px)!important}
+.barbers-grid{
+  grid-template-columns:repeat(3,minmax(0,1fr))!important;
+  gap:14px!important;
+}
+.barber-card{
+  grid-template-columns:88px minmax(0,1fr)!important;
+  min-height:132px;
+  border-radius:22px!important;
+  border-color:rgba(239,215,126,.18)!important;
+  background:linear-gradient(145deg,rgba(14,43,66,.88),rgba(4,15,26,.94))!important;
+  box-shadow:0 18px 46px rgba(0,0,0,.20);
+  transition:transform .22s ease,border-color .22s ease,box-shadow .22s ease;
+}
+.barber-card:hover{transform:translateY(-3px);border-color:rgba(239,215,126,.38)!important;box-shadow:0 24px 58px rgba(0,0,0,.30)}
+.barber-photo{width:88px!important;height:88px!important;border-radius:22px!important}
+.barber-card h3{font-size:23px!important}
+.barber-card p{font-size:10px!important;color:#b9c4cb!important}
+
+#servicos{padding-top:clamp(32px,5vw,62px)}
+.services-grid{
+  grid-template-columns:repeat(4,minmax(0,1fr))!important;
+  gap:12px!important;
+}
+.service-card{
+  min-height:178px;
+  border-radius:20px!important;
+  padding:14px!important;
+  background:linear-gradient(145deg,rgba(14,45,69,.76),rgba(5,17,29,.94))!important;
+  border-color:rgba(239,215,126,.15)!important;
+  box-shadow:none!important;
+  transition:transform .22s ease,border-color .22s ease,background .22s ease;
+}
+.service-card:hover,.service-card:focus-within{transform:translateY(-3px);border-color:rgba(239,215,126,.42)!important;background:linear-gradient(145deg,rgba(20,58,88,.9),rgba(6,18,30,.96))!important}
+.service-card img{
+  width:58px!important;
+  height:58px!important;
+  border-radius:16px!important;
+  margin-bottom:2px;
+}
+.service-card h3{font-size:21px!important;line-height:1.05!important;margin:0!important}
+.service-card p{font-size:10px!important;line-height:1.45!important;color:#aebbc3!important}
+.service-card>span{font-size:8px!important;color:var(--gold-light)!important}
+.service-select-cta{min-height:34px!important;border-radius:999px!important}
+
+.portfolio-section{padding-top:clamp(34px,5vw,62px)!important}
+.portfolio-grid{
+  grid-template-columns:1.08fr .92fr .92fr!important;
+  grid-auto-rows:180px;
+  gap:12px!important;
+}
+.portfolio-card,.portfolio-card.featured{
+  min-height:0!important;
+  height:100%;
+  border-radius:24px!important;
+  border-color:rgba(239,215,126,.18)!important;
+  overflow:hidden;
+}
+.portfolio-card:first-child{grid-row:span 2}
+.portfolio-card-content h3{font-size:clamp(19px,2vw,26px)!important}
+.portfolio-card-content p{font-size:10px!important}
+.portfolio-filters button{border-radius:999px}
+
+.booking-section{
+  grid-template-columns:minmax(250px,.36fr) minmax(0,1fr)!important;
+  gap:clamp(18px,3vw,34px)!important;
+  align-items:start;
+}
+.booking-intro{
+  position:sticky;
+  top:92px;
+  padding:24px;
+  border:1px solid rgba(239,215,126,.16);
+  border-radius:26px;
+  background:linear-gradient(160deg,rgba(13,42,64,.78),rgba(4,14,24,.92));
+}
+.booking-intro h2{font-size:clamp(30px,3.4vw,48px)}
+.booking-perks span{
+  border-radius:999px;
+  border-color:rgba(239,215,126,.14);
+  background:rgba(255,255,255,.035);
+}
+.booking-card{
+  border-radius:28px!important;
+  border-color:rgba(239,215,126,.22)!important;
+  background:linear-gradient(180deg,rgba(10,33,52,.86),rgba(4,15,25,.96))!important;
+  box-shadow:0 26px 70px rgba(0,0,0,.34)!important;
+}
+.steps{
+  background:rgba(255,255,255,.025);
+  border-bottom-color:rgba(239,215,126,.14);
+}
+.step span{border-color:rgba(239,215,126,.20)}
+.step.active span{box-shadow:0 0 0 6px rgba(215,180,74,.09)}
+.form-step{padding:clamp(18px,3vw,30px)!important}
+.form-title h3{font-size:clamp(22px,2.6vw,32px)!important}
+.choice,.date-button,.time-button{
+  border-color:rgba(239,215,126,.15)!important;
+  background:rgba(255,255,255,.035)!important;
+}
+.choice:hover,.date-button:hover,.time-button:hover,
+.choice.selected,.date-button.selected,.time-button.selected{
+  border-color:rgba(239,215,126,.52)!important;
+  background:rgba(215,180,74,.13)!important;
+}
+.time-context,.booking-review{
+  border-color:rgba(239,215,126,.22)!important;
+  background:linear-gradient(145deg,rgba(215,180,74,.08),rgba(255,255,255,.025))!important;
+}
+.booking-review-grid div{border-color:rgba(239,215,126,.13)!important}
+
+.testimonials-section{padding-top:clamp(34px,5vw,62px)}
+.testimonials-grid{
+  border-radius:26px!important;
+  border-color:rgba(239,215,126,.18)!important;
+  background:linear-gradient(145deg,rgba(13,40,62,.70),rgba(4,14,24,.94))!important;
+}
+.testimonial-card{padding:clamp(20px,3vw,34px)!important}
+.testimonial-card blockquote{font-family:var(--serif);font-size:clamp(18px,2.2vw,28px)!important;color:#fff}
+.testimonial-cta{
+  border-color:rgba(239,215,126,.18);
+  background:rgba(255,255,255,.035);
+}
+
+.visit-section{padding-bottom:clamp(34px,5vw,58px)}
+.visit-grid{
+  grid-template-columns:repeat(3,minmax(0,1fr))!important;
+  gap:12px!important;
+}
+.visit-card{
+  min-height:auto!important;
+  border-radius:22px!important;
+  border-color:rgba(239,215,126,.16)!important;
+  background:linear-gradient(145deg,rgba(12,39,60,.76),rgba(4,14,24,.94))!important;
+}
+.faq-section{padding-top:20px!important}
+footer{
+  border-top:1px solid rgba(239,215,126,.12);
+  background:linear-gradient(180deg,rgba(4,15,25,.72),rgba(3,10,17,.96));
+}
+.mobile-booking-cta{
+  min-height:38px!important;
+  border-radius:16px!important;
+  box-shadow:0 12px 28px rgba(0,0,0,.34)!important;
+}
+.floating-whatsapp{
+  box-shadow:0 12px 30px rgba(215,180,74,.22);
+  animation:whatsBreath 2.8s ease-in-out infinite;
+}
+@keyframes whatsBreath{0%,100%{transform:translateY(0) scale(1)}50%{transform:translateY(-3px) scale(1.035)}}
+
+@media(max-width:1120px){
+  .site-header{height:70px}
+  .business-status,.header-cta{display:none}
+  .menu-button{display:block}
+  .main-nav{
+    display:flex;
+    position:absolute;
+    top:64px;
+    left:16px;
+    right:16px;
+    flex-direction:column;
+    align-items:stretch;
+    padding:10px;
+    border-radius:20px;
+    background:rgba(5,17,28,.86);
+    backdrop-filter:blur(20px);
+    box-shadow:0 24px 70px rgba(0,0,0,.38);
+  }
+  .main-nav a{padding:12px 14px}
+  .hero{grid-template-columns:1fr minmax(230px,320px)}
+  .booking-section{grid-template-columns:1fr!important}
+  .booking-intro{position:static}
+  .services-grid{grid-template-columns:repeat(3,minmax(0,1fr))!important}
+  .barbers-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+  .portfolio-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+  .portfolio-card:first-child{grid-row:span 1}
+}
+
+@media(max-width:720px){
+  body{padding-bottom:calc(62px + env(safe-area-inset-bottom))}
+  .site-header{height:64px;padding-inline:12px}
+  .brand img{width:42px;height:42px}
+  .brand strong{font-size:15px}
+  .brand small{font-size:7px}
+  .hero,.section,.booking-section{
+    width:calc(100% - 24px)!important;
+    padding-top:30px!important;
+    padding-bottom:32px!important;
+  }
+  .hero{
+    grid-template-columns:1fr!important;
+    gap:18px!important;
+  }
+  .hero:before{display:none}
+  .hero-copy{text-align:left}
+  .hero-copy h1{font-size:clamp(36px,11vw,46px)!important}
+  .hero-copy>p{font-size:13px!important;line-height:1.62}
+  .hero-actions{display:grid;grid-template-columns:1fr;gap:9px}
+  .hero-actions .button,.hero-actions .text-link{width:100%;justify-content:center}
+  .hero-mark{
+    display:grid!important;
+    min-height:188px!important;
+    border-radius:24px;
+    order:-1;
+  }
+  .hero-mark img{width:150px!important}
+  .hero-stamp{display:none}
+  .trust-row{
+    grid-template-columns:1fr!important;
+    gap:8px;
+    border-top:0;
+  }
+  .trust-row div{
+    padding:10px 12px;
+    border:1px solid rgba(239,215,126,.12);
+    border-radius:14px;
+    background:rgba(255,255,255,.025);
+  }
+  .section-heading h2,.booking-intro h2,.about-copy h2{font-size:28px!important}
+  .section-heading p,.booking-intro>p,.about-copy>p{font-size:12px!important}
+  .about-section{
+    grid-template-columns:1fr!important;
+    gap:14px!important;
+  }
+  .about-photo-frame{
+    width:100%!important;
+    max-height:220px;
+    border-radius:24px!important;
+    aspect-ratio:16/9!important;
+  }
+  .about-photo-frame:before{border-radius:20px!important}
+  .professional-card{
+    display:grid!important;
+    grid-template-columns:44px minmax(0,1fr)!important;
+    padding:12px!important;
+  }
+  .professional-card p{display:none}
+  .barbers-grid{grid-template-columns:1fr!important}
+  .barber-card{
+    grid-template-columns:62px minmax(0,1fr)!important;
+    min-height:0!important;
+    padding:12px!important;
+    border-radius:17px!important;
+  }
+  .barber-photo{width:62px!important;height:62px!important;border-radius:16px!important}
+  .barber-card h3{font-size:18px!important}
+  .barber-card p{font-size:8px!important}
+  .services-grid{
+    grid-template-columns:repeat(2,minmax(0,1fr))!important;
+    gap:9px!important;
+  }
+  .service-card{
+    min-height:132px!important;
+    padding:12px!important;
+    border-radius:17px!important;
+  }
+  .service-card img{display:none!important}
+  .service-card h3{font-size:17px!important}
+  .service-card p{display:none!important}
+  .service-select-cta{min-height:31px!important}
+  .portfolio-grid{
+    grid-template-columns:repeat(2,minmax(0,1fr))!important;
+    grid-auto-rows:162px;
+    gap:8px!important;
+  }
+  .portfolio-card,.portfolio-card.featured{border-radius:17px!important}
+  .portfolio-card-content h3{font-size:16px!important}
+  .portfolio-card-content span,.portfolio-card-content p{display:none!important}
+  .booking-intro{
+    padding:18px;
+    border-radius:22px;
+  }
+  .booking-intro>p{display:block!important}
+  .booking-perks,.notice-card{display:none!important}
+  .booking-card{border-radius:22px!important}
+  .steps{padding:10px!important}
+  .step small,.steps i{display:none!important}
+  .form-step{padding:16px 12px!important}
+  .form-title h3{font-size:21px!important}
+  .choice-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+  .date-strip{grid-template-columns:repeat(4,minmax(0,1fr))!important}
+  .time-period-grid{grid-template-columns:repeat(3,minmax(0,1fr))!important}
+  .booking-review-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+  .form-footer{grid-template-columns:1fr!important}
+  .visit-grid{grid-template-columns:1fr!important}
+  .visit-card{
+    display:grid!important;
+    grid-template-columns:42px minmax(0,1fr)!important;
+    gap:10px 12px!important;
+    padding:14px!important;
+  }
+  .visit-card h3{font-size:18px!important}
+  footer{padding-bottom:44px!important}
+  .mobile-booking-cta{
+    left:14px!important;
+    right:14px!important;
+    bottom:calc(8px + env(safe-area-inset-bottom))!important;
+  }
+  .floating-whatsapp{
+    width:42px!important;
+    height:42px!important;
+    right:14px!important;
+    bottom:calc(56px + env(safe-area-inset-bottom))!important;
+  }
+}
+
+@media(max-width:390px){
+  .services-grid,.choice-grid{grid-template-columns:1fr!important}
+  .portfolio-grid{grid-template-columns:1fr!important}
+  .date-strip,.time-period-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+}
