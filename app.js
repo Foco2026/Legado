@@ -32,6 +32,7 @@
   let lastBooking = null;
   let toastTimer = null;
   let statusInterval = null;
+  let testimonialsTimer = null;
 
   function showToast(message, error = false) {
     clearTimeout(toastTimer);
@@ -186,8 +187,21 @@
         <blockquote>${L.escapeHTML(item.text)}</blockquote>
         <div class="testimonial-author"><strong>${L.escapeHTML(item.name)}</strong><span>${L.escapeHTML(item.service)}${item.createdAt ? ` · ${L.escapeHTML(L.formatDate(item.createdAt.slice(0, 10), { month: "short", year: "numeric" }))}` : ""}</span></div>
       </article>`).join("");
+    startTestimonialsCarousel();
     observeReveals();
   }
+
+  function startTestimonialsCarousel() {
+    const grid = $("#testimonialsGrid");
+    clearInterval(testimonialsTimer);
+    if (!grid || grid.children.length < 2) return;
+    let index = 0;
+    testimonialsTimer = setInterval(() => {
+      index = (index + 1) % grid.children.length;
+      grid.scrollTo({ left: grid.clientWidth * index, behavior: "smooth" });
+    }, 4800);
+  }
+
   function serviceMeta(service) {
     const pieces = [`${service.durationMinutes} min`];
     if (settings.showPrices && service.price > 0) pieces.push(L.formatCurrency(service.price));
@@ -246,7 +260,13 @@
   function buildDates() {
     availability = L.getAvailability();
     const today = new Date();
-    const daysToShow = Math.min(30, Math.max(18, availability.advanceDays + 1));
+    today.setHours(12, 0, 0, 0);
+    const monthEnd = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+    monthEnd.setHours(12, 0, 0, 0);
+    const maxDate = L.parseISODate(maxBookingDate());
+    maxDate.setHours(12, 0, 0, 0);
+    const finalDate = monthEnd < maxDate ? monthEnd : maxDate;
+    const daysToShow = Math.max(1, Math.floor((finalDate - today) / 86400000) + 1);
     const dates = Array.from({ length: daysToShow }, (_, index) => {
       const date = new Date(today);
       date.setHours(12, 0, 0, 0);
@@ -268,7 +288,6 @@
     elements.customDate.max = maxBookingDate();
     elements.customDate.value = state.date;
   }
-
   function selectDate(date) {
     if (!date || date < L.todayISO() || date > maxBookingDate()) {
       showToast("Escolha uma data dentro do período permitido.", true);

@@ -159,3 +159,136 @@ footer{padding-top:34px;padding-bottom:22px}
   .floating-whatsapp{display:grid;right:14px;bottom:calc(68px + env(safe-area-inset-bottom));width:48px;height:48px}
   .floating-whatsapp small{display:none}
 }
+
+/* Enquadramento premium definitivo */
+:root{--page-max:1180px;--page-gutter:clamp(18px,4vw,48px);--panel-radius:18px}
+body{line-height:1.45}
+.site-header{height:78px;padding-left:max(18px,calc((100vw - var(--page-max))/2));padding-right:max(18px,calc((100vw - var(--page-max))/2));gap:18px}
+.brand img{width:48px;height:48px}.brand strong{font-size:17px}.brand small{letter-spacing:.32em}
+.main-nav{gap:14px}.main-nav a{font-size:8px;white-space:nowrap}
+.header-cta{padding:10px 14px}
+.hero,.section,.booking-section,.legal-page{width:min(var(--page-max),calc(100% - 40px));max-width:var(--page-max);margin-left:auto;margin-right:auto;padding-left:0;padding-right:0}
+.hero{min-height:auto;padding-top:72px;padding-bottom:68px;grid-template-columns:minmax(0,1.04fr) minmax(320px,.82fr);gap:clamp(32px,5vw,70px)}
+.hero-copy{text-align:left}.hero-copy h1{font-size:clamp(48px,5.4vw,76px);max-width:680px}.hero-copy>p{font-size:13px;max-width:560px}
+.hero-actions{gap:12px;margin:26px 0 30px}.trust-row{max-width:620px}
+.hero-mark{min-height:430px}.hero-mark img{width:min(78%,360px)}.logo-halo{width:min(78%,390px)}
+.section,.booking-section{padding-top:72px;padding-bottom:72px}
+.section-heading{max-width:680px;margin-bottom:28px}.section-heading h2,.booking-intro h2,.experience-card h2{font-size:clamp(34px,3.6vw,50px)}.section-heading p,.booking-intro>p,.experience-card p{font-size:11px}
+.services-grid{grid-template-columns:repeat(4,minmax(0,1fr));gap:13px}
+.service-card{min-height:0;border-radius:var(--panel-radius);padding:18px}.service-card img{width:58px;height:58px}.service-card h3{font-size:21px}.service-card p{font-size:9px;line-height:1.55}
+.tutorial-steps{grid-template-columns:repeat(3,minmax(0,1fr));gap:13px}.tutorial-step{min-height:0;border-radius:var(--panel-radius);padding:18px;gap:13px}.tutorial-number{font-size:28px}.tutorial-step h3{font-size:20px}.tutorial-step p{font-size:9px;line-height:1.6}.tutorial-callout{border-radius:var(--panel-radius);padding:20px}
+.about-section{grid-template-columns:minmax(300px,.86fr) minmax(0,1fr);gap:clamp(28px,5vw,66px)}.about-media{min-height:0}.about-photo-frame{width:min(100%,410px)}
+.portfolio-grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}.portfolio-card,.portfolio-card.featured{min-height:340px;border-radius:var(--panel-radius)}.portfolio-card-content{left:18px;right:18px;bottom:18px}.portfolio-card-content h3{font-size:24px}
+.testimonials-grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}.testimonial-card{min-height:0;border-radius:var(--panel-radius);padding:20px}.testimonial-card blockquote{font-size:17px;margin:14px 0 18px}
+.visit-grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}.visit-card{min-height:0;border-radius:var(--panel-radius);padding:20px}
+.booking-section{grid-template-columns:minmax(260px,.56fr) minmax(0,1fr);gap:32px;align-items:start}.booking-intro{top:100px}.booking-card{border-radius:22px}.steps{padding:18px 22px}.form-step{padding:26px}.form-title{margin-bottom:18px}.choice-grid{gap:10px}.date-strip{grid-template-columns:repeat(5,minmax(0,1fr));max-height:none}.date-button{min-height:74px}.time-period-grid{grid-template-columns:repeat(4,minmax(0,1fr))}.form-footer{padding:17px 22px}
+.manage-grid{grid-template-columns:minmax(260px,.78fr) minmax(0,1.22fr);gap:16px}.lookup-card,.lookup-result{border-radius:var(--panel-radius);padding:18px}.client-booking-details{grid-template-columns:repeat(3,minmax(0,1fr))}
+.experience-card{border-radius:22px;padding:34px 36px}
+footer{padding-left:max(20px,calc((100vw - var(--page-max))/2));padding-right:max(20px,calc((100vw - var(--page-max))/2));grid-template-columns:1.2fr repeat(3,minmax(0,1fr));gap:24px}
+
+@media(max-width:1120px){
+  .site-header{height:74px}.business-status,.header-cta{display:none}.menu-button{display:block}
+  .main-nav{display:flex;position:absolute;left:18px;right:18px;top:66px;flex-direction:column;align-items:stretch;gap:4px;opacity:0;transform:translateY(-8px) scale(.98);pointer-events:none;border:1px solid var(--line);border-radius:16px;padding:10px;background:rgba(7,24,39,.93);backdrop-filter:blur(18px);box-shadow:var(--shadow)}
+  .main-nav.open{opacity:1;transform:none;pointer-events:auto}.main-nav a{padding:12px;border-radius:10px}
+  .hero{grid-template-columns:1fr}.hero-mark{min-height:330px}.hero-copy>p,.trust-row{margin-left:0;margin-right:0}
+  .services-grid,.portfolio-grid,.testimonials-grid,.visit-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .booking-section{grid-template-columns:1fr}.booking-intro{position:static}.manage-grid{grid-template-columns:1fr}
+}
+@media(max-width:720px){
+  body{font-size:16px;padding-bottom:calc(64px + env(safe-area-inset-bottom))}
+  .site-header{height:68px;padding-left:14px;padding-right:14px}.brand{min-width:0}.brand img{width:44px;height:44px}.brand strong{font-size:15px}.brand small{letter-spacing:.24em}.menu-button{width:40px;height:40px}
+  .hero,.section,.booking-section,.legal-page{width:calc(100% - 28px);padding-top:42px;padding-bottom:42px}
+  .hero{display:grid;gap:18px}.hero-copy h1{font-size:38px;line-height:1.03;margin:12px 0 14px}.hero-copy>p{font-size:13px}.hero-actions{display:grid;margin:20px 0}.hero-actions .button,.hero-actions .text-link{width:100%;justify-content:center}.trust-row{grid-template-columns:1fr;gap:8px}.trust-row div{padding-top:11px}
+  .hero-mark{min-height:220px}.hero-mark img{width:min(72vw,245px)}.hero-stamp{right:auto;left:50%;bottom:2px;transform:translateX(-50%);white-space:nowrap}
+  .section-heading{margin-bottom:20px}.section-heading h2,.booking-intro h2,.experience-card h2,.about-copy h2{font-size:30px}.section-heading p,.booking-intro>p,.about-copy>p{font-size:12px}
+  .services-grid,.portfolio-grid,.testimonials-grid,.visit-grid,.tutorial-steps,.faq-grid,.field-grid,.choice-grid{grid-template-columns:1fr!important}
+  .service-card{display:grid;grid-template-columns:52px minmax(0,1fr);gap:12px;padding:15px;align-items:center}.service-card img{width:50px;height:50px}.service-card h3{font-size:19px}.service-card p{font-size:10px}.service-card>span,.service-select-cta{grid-column:1/-1}
+  .tutorial-step{grid-template-columns:38px minmax(0,1fr);padding:15px}.tutorial-callout{display:grid;padding:18px}.tutorial-actions{display:grid;width:100%}
+  .about-section{grid-template-columns:1fr}.about-photo-frame{width:100%;aspect-ratio:4/5}.professional-card{grid-template-columns:48px minmax(0,1fr)}
+  .portfolio-card,.portfolio-card.featured{min-height:300px}.portfolio-footer,.testimonial-cta{display:grid;align-items:stretch}.portfolio-footer .button,.testimonial-cta .button{width:100%}
+  .booking-card{border-radius:18px}.steps{grid-template-columns:repeat(4,1fr);gap:6px;padding:12px}.steps i,.step small{display:none}.step span{width:32px;height:32px}.form-step{padding:18px 14px}.form-title{gap:10px}.form-title>span{font-size:24px}.form-title h3{font-size:22px}
+  .date-strip{grid-template-columns:repeat(2,minmax(0,1fr))}.date-button{min-height:66px}.time-context{position:static;display:grid}.time-period-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.time-button{min-height:60px}
+  .form-footer{grid-template-columns:1fr;padding:14px}.summary-mini{text-align:left;font-size:11px}.form-footer .button,.button{width:100%;min-height:46px}
+  .client-booking-head,.experience-card{display:grid}.client-booking-details{grid-template-columns:1fr!important}.client-actions,.modal-actions,.about-actions,.experience-actions{display:grid;grid-template-columns:1fr}
+  footer{grid-template-columns:1fr;padding-left:14px;padding-right:14px;padding-bottom:82px;gap:16px}.footer-brand img{width:56px}
+  .mobile-booking-cta{display:flex;left:12px;right:12px;min-height:42px}.floating-whatsapp{display:grid;right:14px;bottom:calc(66px + env(safe-area-inset-bottom));width:46px;height:46px}.floating-whatsapp small{display:none}
+}
+@media(max-width:390px){
+  .hero-copy h1{font-size:34px}.section-heading h2,.booking-intro h2,.experience-card h2,.about-copy h2{font-size:28px}
+  .date-strip,.time-period-grid{grid-template-columns:1fr}.service-card{grid-template-columns:1fr}.service-card img{width:54px;height:54px}
+}
+
+/* Experiência de aplicativo: menos conteúdo visível, mais foco no agendamento */
+main{display:flex;flex-direction:column}
+#inicio{order:1}#servicos{order:2}#agendar{order:3}#avaliacoes{order:4}#visite{order:5}#duvidas{order:6}#meus-horarios{order:7}
+.tutorial-section,.about-section,.portfolio-section,.experience-section{display:none!important}
+.main-nav a[href="#como-usar"],.main-nav a[href="#sobre"],.main-nav a[href="#portfolio"],.main-nav a[href="#meus-horarios"],.main-nav a[href="#duvidas"]{display:none}
+.hero{padding-top:50px;padding-bottom:44px}
+.hero-copy h1{font-size:clamp(42px,4.8vw,64px)}
+.hero-copy>p{max-width:500px}
+.hero-mark{min-height:300px}
+.trust-row div{padding-top:14px}
+.section,.booking-section{padding-top:48px;padding-bottom:48px}
+.section-heading{margin-bottom:18px}
+.section-heading h2,.booking-intro h2,.experience-card h2{font-size:clamp(30px,3vw,42px)}
+.services-grid{grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+.service-card{padding:14px;gap:9px}
+.service-card p{display:none}
+.service-card:focus-within p,.service-card:hover p{display:block}
+.service-card>span{border-top:0;padding-top:2px;font-size:8px}
+.service-select-cta{min-height:32px;font-size:7px}
+.booking-section{grid-template-columns:minmax(220px,.44fr) minmax(0,1fr);gap:22px}
+.booking-intro p{max-width:380px}
+.booking-perks{margin:16px 0;gap:7px}.booking-perks span{font-size:8px}
+.notice-card{padding:10px 12px}.notice-card p{font-size:8px}
+.booking-card{border-radius:18px;box-shadow:0 18px 45px rgba(0,0,0,.24)}
+.steps{padding:14px 18px}
+.form-step{padding:20px}
+.form-title{margin-bottom:14px}.form-title>span{font-size:23px}.form-title h3{font-size:22px}.form-title p{font-size:8px}
+.choice-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.choice{padding:13px;border-radius:12px}.choice strong{font-size:15px}.choice small{font-size:7px}
+.date-strip{grid-template-columns:repeat(7,minmax(0,1fr));gap:7px}
+.date-button{min-height:58px;border-radius:11px}.date-button strong{font-size:18px}
+.date-picker-label{margin-top:10px}
+.time-context{padding:10px 12px}.time-period{gap:7px}.time-period h4{font-size:16px}.time-period-grid{gap:7px}
+.time-button{min-height:54px;font-size:12px;border-radius:11px}
+.form-footer{padding:12px 16px}
+.summary-mini{font-size:8px}
+.testimonials-grid{display:flex!important;grid-template-columns:none!important;overflow:hidden;scroll-snap-type:x mandatory;scroll-behavior:smooth;gap:0;border:1px solid var(--line);border-radius:18px;background:rgba(7,24,39,.55)}
+.testimonial-card{flex:0 0 100%;scroll-snap-align:start;border:0;border-radius:0;background:transparent;min-height:160px;padding:22px 24px}
+.testimonial-card blockquote{font-size:16px;line-height:1.45;margin:12px 0 16px}
+.testimonial-cta{display:none}
+.visit-grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.visit-card{padding:16px}.visit-icon{width:38px;height:38px;margin-bottom:12px}.visit-card h3{font-size:19px}.visit-card p{font-size:8px}
+.faq-section{padding-top:24px}.faq-section .section-heading{display:none}.faq-grid{max-width:760px;grid-template-columns:1fr}.faq-grid details{border-radius:12px}.faq-grid summary{padding:14px 28px 14px 0;font-size:15px}
+.manage-section{padding-top:24px}.manage-section .section-heading h2{font-size:28px}.manage-section .section-heading p{display:none}
+.mobile-booking-cta{min-height:36px;font-size:8px;box-shadow:0 8px 24px rgba(0,0,0,.28);left:18px;right:18px}
+
+@media(max-width:1120px){
+  .booking-section{grid-template-columns:1fr}
+  .booking-intro{display:grid;grid-template-columns:1fr auto;gap:16px;align-items:end}
+  .booking-intro .notice-card{display:none}
+  .services-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
+}
+@media(max-width:720px){
+  #meus-horarios{display:none}
+  .hero,.section,.booking-section{padding-top:30px;padding-bottom:30px}
+  .hero{gap:10px}.hero-copy h1{font-size:32px}.hero-copy>p{font-size:12px}.hero-mark{display:none}
+  .trust-row{grid-template-columns:repeat(3,minmax(0,1fr));gap:0}.trust-row div{padding:10px 6px 0 0}.trust-row strong{font-size:12px}.trust-row span{font-size:7px}
+  .services-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:8px}
+  .service-card{display:grid;grid-template-columns:1fr;padding:12px;gap:7px;min-height:112px}
+  .service-card img{display:none}.service-card h3{font-size:16px;margin:0}.service-card>span{font-size:8px}.service-select-cta{min-height:30px}
+  .booking-intro{display:block}.booking-intro h2{font-size:28px}.booking-intro>p,.booking-perks,.notice-card{display:none}
+  .booking-card{border-radius:16px}.steps{padding:10px}.step span{width:28px;height:28px}
+  .form-step{padding:15px 12px}.form-title>span{display:none}.form-title h3{font-size:20px}
+  .choice-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}.choice{padding:11px;min-height:66px}.choice strong{font-size:14px}.choice small{font-size:7px}
+  .date-strip{grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}.date-button{min-height:52px}.date-button strong{font-size:17px}.date-button span,.date-button small{font-size:6px}
+  .date-picker-label{display:none}
+  .time-period-grid{grid-template-columns:repeat(3,minmax(0,1fr))}.time-button{min-height:50px;font-size:11px}
+  .field-grid{gap:9px}.field-grid textarea{min-height:80px}
+  .testimonials-grid{border-radius:16px}.testimonial-card{min-height:150px;padding:18px}.testimonial-card blockquote{font-size:15px}
+  .visit-grid{grid-template-columns:1fr!important}.visit-card{display:grid;grid-template-columns:38px minmax(0,1fr);gap:12px;align-items:center}.visit-card .text-link,.visit-card .visit-live-status{grid-column:2}.visit-card p{margin:0}
+  .faq-section{display:block}.faq-grid details{padding:0 14px}
+  .mobile-booking-cta{left:22px;right:22px;min-height:34px;font-size:8px;bottom:calc(8px + env(safe-area-inset-bottom))}
+  .floating-whatsapp{width:42px;height:42px;bottom:calc(54px + env(safe-area-inset-bottom))}
+}
