@@ -620,6 +620,48 @@
     input.value = L.formatPhone(input.value);
   }
 
+  function clientInitials(name = "Cliente Legado") {
+    return String(name || "CL").split(/\s+/).filter(Boolean).slice(0, 2).map(part => part[0]).join("").toUpperCase() || "CL";
+  }
+
+  function renderProfileAvatar(client = null) {
+    const preview = $("#profileAvatarPreview");
+    if (!preview) return;
+    if (client?.photo) {
+      preview.innerHTML = `<img src="${L.escapeHTML(client.photo)}" alt="${L.escapeHTML(client.name)}" />`;
+    } else {
+      preview.textContent = clientInitials(client?.name || $("#profileName")?.value || "Cliente Legado");
+    }
+  }
+
+  function findClientByPhone(value) {
+    const digits = L.normalizePhone(value);
+    if (digits.length < 10) return null;
+    return L.getClients().find(client => client.phoneDigits === digits) || null;
+  }
+
+  function applyClientProfile(client, target = "all") {
+    if (!client) return false;
+    if (target === "all" || target === "profile") {
+      if ($("#profileName")) $("#profileName").value = client.name || "";
+      if ($("#profilePhone")) $("#profilePhone").value = client.phone || "";
+      if ($("#profilePhotoData")) $("#profilePhotoData").value = client.photo || "";
+      if ($("#profileNotes")) $("#profileNotes").value = client.notes || "";
+      renderProfileAvatar(client);
+    }
+    if (target === "all" || target === "booking") {
+      if ($("#clientName") && !$("#clientName").value.trim()) $("#clientName").value = client.name || "";
+      if ($("#clientPhone")) $("#clientPhone").value = client.phone || $("#clientPhone").value;
+      if ($("#clientPhotoData")) $("#clientPhotoData").value = client.photo || "";
+      if ($("#notes") && client.notes && !$("#notes").value.trim()) $("#notes").value = client.notes;
+    }
+    if (target === "all" || target === "review") {
+      if ($("#reviewName")) $("#reviewName").value = client.name || $("#reviewName").value;
+      if ($("#reviewPhone")) $("#reviewPhone").value = client.phone || $("#reviewPhone").value;
+    }
+    return true;
+  }
+
   function renderLookup(booking) {
     const canCancel = L.canClientCancel(booking);
     const upcoming = ["pending", "confirmed"].includes(booking.status) && L.dateTimeValue(booking.date, booking.startTime) > Date.now();
@@ -736,32 +778,39 @@
   });
 
   elements.professional.addEventListener("change", () => { state.time = ""; buildTimes(); updateSummary(); });
-  [$("#clientPhone"), $("#lookupPhone"), $("#reviewPhone")].filter(Boolean).forEach(input => input.addEventListener("input", () => formatInputPhone(input)));
-  $("#clientPhoto")?.addEventListener("change", async event => {
+  [$("#clientPhone"), $("#lookupPhone"), $("#reviewPhone"), $("#profilePhone")].filter(Boolean).forEach(input => input.addEventListener("input", () => {
+    formatInputPhone(input);
+    const client = findClientByPhone(input.value);
+    if (!client) return;
+    if (input.id === "clientPhone") applyClientProfile(client, "booking");
+    if (input.id === "reviewPhone") applyClientProfile(client, "review");
+    if (input.id === "profilePhone") applyClientProfile(client, "profile");
+  }));
+  $("#profileName")?.addEventListener("input", () => renderProfileAvatar({ name: $("#profileName").value, photo: $("#profilePhotoData")?.value || "" }));
+  $("#profilePhoto")?.addEventListener("change", async event => {
     const file = event.target.files?.[0];
     if (!file) return;
     try {
       showToast("Preparando foto do perfil...");
-      $("#clientPhotoData").value = await optimizeImage(file, 720, .78);
+      $("#profilePhotoData").value = await optimizeImage(file, 720, .78);
+      renderProfileAvatar({ name: $("#profileName").value, photo: $("#profilePhotoData").value });
       showToast("Foto adicionada ao cadastro.");
     } catch (error) {
-      $("#clientPhotoData").value = "";
+      $("#profilePhotoData").value = "";
       event.target.value = "";
       showToast(error.message, true);
     }
   });
-  $("#reviewPhoto")?.addEventListener("change", async event => {
-    const file = event.target.files?.[0];
-    if (!file) return;
-    try {
-      showToast("Preparando foto da avaliação...");
-      $("#reviewPhotoData").value = await optimizeImage(file, 720, .78);
-      showToast("Foto adicionada à avaliação.");
-    } catch (error) {
-      $("#reviewPhotoData").value = "";
-      event.target.value = "";
-      showToast(error.message, true);
-    }
+  $("#profileForm")?.addEventListener("submit", event => {
+    event.preventDefault();
+    const name = $("#profileName").value.trim();
+    const phone = L.formatPhone($("#profilePhone").value);
+    const phoneDigits = L.normalizePhone(phone);
+    if (name.length < 2) return showToast("Informe seu nome para salvar o cadastro.", true);
+    if (phoneDigits.length < 10) return showToast("Informe um WhatsApp válido.", true);
+    const client = L.upsertClient({ name, phone, phoneDigits, photo: $("#profilePhotoData").value || "", notes: $("#profileNotes").value.trim() });
+    applyClientProfile(client, "all");
+    showToast("Cadastro salvo. Seus próximos agendamentos ficam mais rápidos.");
   });
   $("#reviewForm")?.addEventListener("submit", event => {
     event.preventDefault();
@@ -774,7 +823,7 @@
     if (text.length < 8) return showToast("Escreva um comentário um pouco maior.", true);
     if (!$("#reviewConsent").checked) return showToast("Autorize o uso da avaliação para continuar.", true);
     const existingClient = L.getClients().find(client => client.phoneDigits === phoneDigits);
-    const photo = $("#reviewPhotoData").value || existingClient?.photo || "";
+    const photo = existingClient?.photo || "";
     const items = L.getTestimonials(true);
     items.push(L.normalizeTestimonial({
       id: `testimonial-${Date.now()}-${Math.random().toString(16).slice(2)}`,
@@ -793,9 +842,8 @@
       updatedAt: new Date().toISOString()
     }));
     L.setTestimonials(items);
-    L.upsertClient({ name, phone, phoneDigits, photo });
+    L.upsertClient({ name, phone, phoneDigits, photo, notes: existingClient?.notes || "" });
     $("#reviewForm").reset();
-    $("#reviewPhotoData").value = "";
     showToast("Avaliação enviada. Ela aparecerá no site depois da aprovação.");
   });
   $("#lookupCode").addEventListener("input", event => { event.target.value = event.target.value.toUpperCase().replace(/[^A-Z0-9-]/g, "").slice(0, 8); });
