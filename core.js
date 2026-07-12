@@ -9,6 +9,7 @@
     blocks: "legadoBlockedSlots",
     portfolio: "legadoPortfolio",
     testimonials: "legadoTestimonials",
+    clients: "legadoClients",
     credentials: "legadoAdminCredentials",
     session: "legadoAdminSession"
   };
@@ -85,8 +86,10 @@
   const LEGACY_PORTFOLIO_IMAGES = new Set(["assets/corte.webp", "assets/barba.webp", "assets/produtos.webp", "assets/agendamento.webp"]);
 
   const DEFAULT_TESTIMONIALS = [];
+  const DEFAULT_CLIENTS = [];
   const ICONS = ["corte.webp", "barba.webp", "produtos.webp", "agendamento.webp"];
   const VALID_STATUSES = ["pending", "confirmed", "completed", "cancelled", "no_show"];
+  const VALID_TESTIMONIAL_STATUSES = ["pending", "approved", "rejected"];
   const ACTIVE_BOOKING_STATUSES = ["pending", "confirmed"];
 
   function clone(value) {
@@ -232,26 +235,119 @@
   }
 
   function normalizeTestimonial(item, index = 0) {
+    const status = VALID_TESTIMONIAL_STATUSES.includes(item?.status) ? item.status : (item?.active === false ? "pending" : "approved");
     return {
       id: String(item?.id || `testimonial-${Date.now()}-${index}`),
       name: String(item?.name || "Cliente Legado"),
+      phone: formatPhone(item?.phone || ""),
+      phoneDigits: normalizePhone(item?.phoneDigits || item?.phone || ""),
       service: String(item?.service || "Atendimento Legado"),
       text: String(item?.text || ""),
       rating: Math.min(5, Math.max(1, Number(item?.rating) || 5)),
-      active: item?.active !== false,
+      photo: String(item?.photo || item?.profilePhoto || ""),
+      status,
+      active: item?.active === true || status === "approved",
       order: Number.isFinite(Number(item?.order)) ? Number(item.order) : index + 1,
-      createdAt: item?.createdAt || new Date().toISOString()
+      source: item?.source || "admin",
+      createdAt: item?.createdAt || new Date().toISOString(),
+      updatedAt: item?.updatedAt || item?.createdAt || new Date().toISOString()
     };
   }
 
   function getTestimonials(includeInactive = false) {
     const raw = loadRaw(KEYS.testimonials, DEFAULT_TESTIMONIALS);
     const items = Array.isArray(raw) ? raw.map(normalizeTestimonial) : [];
-    return items.filter(item => includeInactive || item.active).sort((a, b) => a.order - b.order);
+    return items
+      .filter(item => includeInactive || (item.active && item.status === "approved"))
+      .sort((a, b) => includeInactive ? `${a.status === "pending" ? "0" : "1"}${a.order}`.localeCompare(`${b.status === "pending" ? "0" : "1"}${b.order}`) : a.order - b.order);
   }
 
   function setTestimonials(items) {
     save(KEYS.testimonials, (Array.isArray(items) ? items : []).map(normalizeTestimonial));
+  }
+
+  function normalizeClient(client, index = 0) {
+    const phoneDigits = normalizePhone(client?.phoneDigits || client?.phone || "");
+    return {
+      id: String(client?.id || phoneDigits || `client-${Date.now()}-${index}`),
+      name: String(client?.name || "Cliente Legado"),
+      phone: formatPhone(client?.phone || phoneDigits),
+      phoneDigits,
+      photo: String(client?.photo || client?.profilePhoto || ""),
+      notes: String(client?.notes || ""),
+      firstSeenAt: client?.firstSeenAt || client?.createdAt || new Date().toISOString(),
+      lastSeenAt: client?.lastSeenAt || client?.updatedAt || client?.createdAt || new Date().toISOString(),
+      createdAt: client?.createdAt || client?.firstSeenAt || new Date().toISOString(),
+      updatedAt: client?.updatedAt || new Date().toISOString()
+    };
+  }
+
+  function getStoredClients() {
+    const raw = loadRaw(KEYS.clients, DEFAULT_CLIENTS);
+    return Array.isArray(raw) ? raw.map(normalizeClient).filter(client => client.phoneDigits) : [];
+  }
+
+  function setClients(clients) {
+    const byPhone = new Map();
+    (Array.isArray(clients) ? clients : []).map(normalizeClient).filter(client => client.phoneDigits).forEach(client => byPhone.set(client.phoneDigits, client));
+    save(KEYS.clients, [...byPhone.values()]);
+  }
+
+  function upsertClient(client) {
+    const normalized = normalizeClient(client);
+    if (!normalized.phoneDigits) return normalized;
+    const clients = getStoredClients();
+    const index = clients.findIndex(item => item.phoneDigits === normalized.phoneDigits);
+    const now = new Date().toISOString();
+    if (index >= 0) {
+      clients[index] = normalizeClient({
+        ...clients[index],
+        ...normalized,
+        photo: normalized.photo || clients[index].photo,
+        firstSeenAt: clients[index].firstSeenAt,
+        lastSeenAt: now,
+        updatedAt: now
+      });
+    } else {
+      clients.push(normalizeClient({ ...normalized, firstSeenAt: now, lastSeenAt: now, createdAt: now, updatedAt: now }));
+    }
+    setClients(clients);
+    return normalized;
+  }
+
+  function getClients() {
+    const byPhone = new Map(getStoredClients().map(client => [client.phoneDigits, client]));
+    getBookings().forEach(booking => {
+      const key = booking.phoneDigits || normalizePhone(booking.phone);
+      if (!key) return;
+      const existing = byPhone.get(key);
+      byPhone.set(key, normalizeClient({
+        ...existing,
+        name: booking.name || existing?.name,
+        phone: booking.phone || existing?.phone,
+        phoneDigits: key,
+        photo: booking.clientPhoto || existing?.photo,
+        firstSeenAt: existing?.firstSeenAt || booking.createdAt,
+        lastSeenAt: booking.updatedAt || booking.createdAt || existing?.lastSeenAt,
+        createdAt: existing?.createdAt || booking.createdAt,
+        updatedAt: existing?.updatedAt || booking.updatedAt || booking.createdAt
+      }));
+    });
+    getTestimonials(true).forEach(testimonial => {
+      const key = testimonial.phoneDigits || normalizePhone(testimonial.phone);
+      if (!key) return;
+      const existing = byPhone.get(key);
+      byPhone.set(key, normalizeClient({
+        ...existing,
+        name: testimonial.name || existing?.name,
+        phone: testimonial.phone || existing?.phone,
+        phoneDigits: key,
+        photo: testimonial.photo || existing?.photo,
+        lastSeenAt: testimonial.updatedAt || testimonial.createdAt || existing?.lastSeenAt,
+        updatedAt: testimonial.updatedAt || testimonial.createdAt || existing?.updatedAt
+      }));
+    });
+    return [...byPhone.values()].sort((a, b) => a.name.localeCompare(b.name, "pt-BR"));
   }
 
   function normalizePeriod(period) {
@@ -390,6 +486,7 @@
       name: String(booking.name || "Cliente"),
       phone: formatPhone(booking.phone || ""),
       phoneDigits: normalizePhone(booking.phoneDigits || booking.phone || ""),
+      clientPhoto: String(booking.clientPhoto || booking.photo || ""),
       professional: String(booking.professional || getSettings().professional),
       notes: String(booking.notes || ""),
       status: VALID_STATUSES.includes(booking.status) ? booking.status : "pending",
@@ -417,6 +514,7 @@
     if (index >= 0) bookings[index] = normalized;
     else bookings.push(normalized);
     setBookings(bookings);
+    upsertClient({ name: normalized.name, phone: normalized.phone, phoneDigits: normalized.phoneDigits, photo: normalized.clientPhoto });
     return normalized;
   }
 
@@ -656,7 +754,7 @@
 
   function getBackup() {
     return {
-      version: 3,
+      version: 4,
       exportedAt: new Date().toISOString(),
       settings: getSettings(),
       services: getServices(true),
@@ -664,7 +762,8 @@
       bookings: getBookings(),
       blocks: getBlocks(),
       portfolio: getPortfolio(true),
-      testimonials: getTestimonials(true)
+      testimonials: getTestimonials(true),
+      clients: getClients()
     };
   }
 
@@ -677,6 +776,7 @@
     if (Array.isArray(data.blocks)) setBlocks(data.blocks);
     if (Array.isArray(data.portfolio)) setPortfolio(data.portfolio);
     if (Array.isArray(data.testimonials)) setTestimonials(data.testimonials);
+    if (Array.isArray(data.clients)) setClients(data.clients);
   }
 
   window.Legado = {
@@ -686,8 +786,10 @@
     DEFAULT_AVAILABILITY,
     DEFAULT_PORTFOLIO,
     DEFAULT_TESTIMONIALS,
+    DEFAULT_CLIENTS,
     ICONS,
     VALID_STATUSES,
+    VALID_TESTIMONIAL_STATUSES,
     ACTIVE_BOOKING_STATUSES,
     clone,
     loadRaw,
@@ -709,6 +811,10 @@
     normalizeTestimonial,
     getTestimonials,
     setTestimonials,
+    normalizeClient,
+    getClients,
+    setClients,
+    upsertClient,
     getAvailability,
     setAvailability,
     timeToMinutes,

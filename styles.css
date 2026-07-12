@@ -940,3 +940,82 @@ footer{
   .portfolio-grid{grid-template-columns:1fr!important}
   .date-strip,.time-period-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}
 }
+
+/* V28 - Feedback direto no site e perfil de cliente */
+.client-photo-field,.review-photo-field{
+  border:1px solid rgba(239,215,126,.16);
+  border-radius:14px;
+  padding:12px;
+  background:rgba(255,255,255,.025);
+}
+.client-photo-field input[type=file],.review-photo-field input[type=file]{
+  padding:9px;
+  cursor:pointer;
+}
+.client-photo-field small,.review-photo-field small{
+  color:var(--muted);
+  font-size:8px;
+  line-height:1.5;
+}
+.testimonial-author{
+  display:grid!important;
+  grid-template-columns:auto minmax(0,1fr);
+  align-items:center;
+  gap:12px;
+}
+.testimonial-author:not(:has(img)){
+  grid-template-columns:1fr;
+}
+.testimonial-avatar{
+  width:46px;
+  height:46px;
+  border-radius:50%;
+  object-fit:cover;
+  border:1px solid rgba(239,215,126,.42);
+  background:#071728;
+}
+.testimonial-cta{
+  align-items:start;
+}
+.review-form{
+  width:min(560px,100%);
+  display:grid;
+  gap:12px;
+}
+.review-form-grid{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:10px;
+}
+.review-form label{
+  display:grid;
+  gap:6px;
+}
+.review-form .full{
+  grid-column:1/-1;
+}
+.review-form label>span{
+  font-size:8px;
+  color:#ccd5db;
+}
+.review-form input,.review-form select,.review-form textarea{
+  width:100%;
+  border:1px solid rgba(255,255,255,.11);
+  border-radius:11px;
+  background:rgba(1,9,16,.42);
+  color:#eef2f5;
+  padding:12px;
+  outline:none;
+}
+.review-form input:focus,.review-form select:focus,.review-form textarea:focus{
+  border-color:var(--gold);
+}
+.review-form textarea{
+  resize:vertical;
+}
+@media(max-width:720px){
+  .review-form,.testimonial-cta{width:100%}
+  .review-form-grid{grid-template-columns:1fr}
+  .review-form .full{grid-column:auto}
+  .testimonial-author{grid-template-columns:auto minmax(0,1fr)!important}
+}

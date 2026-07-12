@@ -42,6 +42,33 @@
     toastTimer = setTimeout(() => elements.toast.classList.remove("show"), 2800);
   }
 
+  async function optimizeImage(file, maxDimension = 900, quality = 0.78) {
+    if (!file || !file.type.startsWith("image/")) throw new Error("Escolha uma imagem válida.");
+    if (file.size > 12 * 1024 * 1024) throw new Error("A imagem é muito grande. Escolha um arquivo com até 12 MB.");
+    const objectUrl = URL.createObjectURL(file);
+    try {
+      const image = new Image();
+      await new Promise((resolve, reject) => {
+        image.onload = resolve;
+        image.onerror = () => reject(new Error("Não foi possível ler a imagem."));
+        image.src = objectUrl;
+      });
+      const scale = Math.min(1, maxDimension / Math.max(image.naturalWidth, image.naturalHeight));
+      const width = Math.max(1, Math.round(image.naturalWidth * scale));
+      const height = Math.max(1, Math.round(image.naturalHeight * scale));
+      const canvas = document.createElement("canvas");
+      canvas.width = width;
+      canvas.height = height;
+      const context = canvas.getContext("2d", { alpha: false });
+      context.fillStyle = "#071728";
+      context.fillRect(0, 0, width, height);
+      context.drawImage(image, 0, 0, width, height);
+      return canvas.toDataURL("image/webp", quality);
+    } finally {
+      URL.revokeObjectURL(objectUrl);
+    }
+  }
+
   function configuredStatus(now = new Date()) {
     availability = L.getAvailability();
     const blocks = L.getBlocks();
@@ -219,7 +246,10 @@
       <article class="testimonial-card reveal">
         <div class="testimonial-stars" aria-label="${item.rating} de 5 estrelas">${"★".repeat(item.rating)}${"☆".repeat(5-item.rating)}</div>
         <blockquote>${L.escapeHTML(item.text)}</blockquote>
-        <div class="testimonial-author"><strong>${L.escapeHTML(item.name)}</strong><span>${L.escapeHTML(item.service)}${item.createdAt ? ` · ${L.escapeHTML(L.formatDate(item.createdAt.slice(0, 10), { month: "short", year: "numeric" }))}` : ""}</span></div>
+        <div class="testimonial-author">
+          ${item.photo ? `<img class="testimonial-avatar" src="${L.escapeHTML(item.photo)}" alt="${L.escapeHTML(item.name)}" loading="lazy" />` : ""}
+          <div><strong>${L.escapeHTML(item.name)}</strong><span>${L.escapeHTML(item.service)}${item.createdAt ? ` · ${L.escapeHTML(L.formatDate(item.createdAt.slice(0, 10), { month: "short", year: "numeric" }))}` : ""}</span></div>
+        </div>
       </article>`).join("");
     startTestimonialsCarousel();
     observeReveals();
@@ -481,6 +511,7 @@
       endTime: L.addMinutes(state.time, state.service.durationMinutes),
       name: $("#clientName").value.trim(),
       phone: L.formatPhone($("#clientPhone").value),
+      clientPhoto: $("#clientPhotoData")?.value || "",
       professional: elements.professional.value || settings.professional,
       notes: $("#notes").value.trim(),
       status: "pending",
@@ -504,6 +535,7 @@
     }
 
     lastBooking = booking;
+    L.upsertClient({ name: booking.name, phone: booking.phone, phoneDigits: booking.phoneDigits, photo: booking.clientPhoto });
     showConfirmation(booking);
     state.rebookingId = null;
   }
@@ -628,6 +660,7 @@
     state.date = ""; state.dateLabel = ""; state.time = "";
     $("#clientName").value = booking.name;
     $("#clientPhone").value = booking.phone;
+    if ($("#clientPhotoData")) $("#clientPhotoData").value = booking.clientPhoto || L.getClients().find(client => client.phoneDigits === booking.phoneDigits)?.photo || "";
     $("#notes").value = booking.notes;
     $("#privacyConsent").checked = true;
     buildDates(); buildTimes(); updateSummary(); goToStep(2);
@@ -703,7 +736,68 @@
   });
 
   elements.professional.addEventListener("change", () => { state.time = ""; buildTimes(); updateSummary(); });
-  [$("#clientPhone"), $("#lookupPhone")].forEach(input => input.addEventListener("input", () => formatInputPhone(input)));
+  [$("#clientPhone"), $("#lookupPhone"), $("#reviewPhone")].filter(Boolean).forEach(input => input.addEventListener("input", () => formatInputPhone(input)));
+  $("#clientPhoto")?.addEventListener("change", async event => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    try {
+      showToast("Preparando foto do perfil...");
+      $("#clientPhotoData").value = await optimizeImage(file, 720, .78);
+      showToast("Foto adicionada ao cadastro.");
+    } catch (error) {
+      $("#clientPhotoData").value = "";
+      event.target.value = "";
+      showToast(error.message, true);
+    }
+  });
+  $("#reviewPhoto")?.addEventListener("change", async event => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    try {
+      showToast("Preparando foto da avaliação...");
+      $("#reviewPhotoData").value = await optimizeImage(file, 720, .78);
+      showToast("Foto adicionada à avaliação.");
+    } catch (error) {
+      $("#reviewPhotoData").value = "";
+      event.target.value = "";
+      showToast(error.message, true);
+    }
+  });
+  $("#reviewForm")?.addEventListener("submit", event => {
+    event.preventDefault();
+    const name = $("#reviewName").value.trim();
+    const phone = L.formatPhone($("#reviewPhone").value);
+    const phoneDigits = L.normalizePhone(phone);
+    const text = $("#reviewText").value.trim();
+    if (name.length < 2) return showToast("Informe seu nome para enviar a avaliação.", true);
+    if (phoneDigits.length < 10) return showToast("Informe um WhatsApp válido.", true);
+    if (text.length < 8) return showToast("Escreva um comentário um pouco maior.", true);
+    if (!$("#reviewConsent").checked) return showToast("Autorize o uso da avaliação para continuar.", true);
+    const existingClient = L.getClients().find(client => client.phoneDigits === phoneDigits);
+    const photo = $("#reviewPhotoData").value || existingClient?.photo || "";
+    const items = L.getTestimonials(true);
+    items.push(L.normalizeTestimonial({
+      id: `testimonial-${Date.now()}-${Math.random().toString(16).slice(2)}`,
+      name,
+      phone,
+      phoneDigits,
+      service: $("#reviewService").value.trim() || "Atendimento Legado",
+      text,
+      rating: Number($("#reviewRating").value) || 5,
+      photo,
+      status: "pending",
+      active: false,
+      source: "site",
+      order: items.length + 1,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    }));
+    L.setTestimonials(items);
+    L.upsertClient({ name, phone, phoneDigits, photo });
+    $("#reviewForm").reset();
+    $("#reviewPhotoData").value = "";
+    showToast("Avaliação enviada. Ela aparecerá no site depois da aprovação.");
+  });
   $("#lookupCode").addEventListener("input", event => { event.target.value = event.target.value.toUpperCase().replace(/[^A-Z0-9-]/g, "").slice(0, 8); });
   elements.lookupForm.addEventListener("submit", event => {
     event.preventDefault();

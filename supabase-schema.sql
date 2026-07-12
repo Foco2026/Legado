@@ -59,6 +59,7 @@ create table if not exists public.bookings (
   client_name text not null,
   client_phone text not null,
   phone_digits text not null,
+  client_photo text not null default '',
   professional text not null,
   notes text not null default '',
   status text not null default 'pending' check (status in ('pending','confirmed','completed','cancelled','no_show')),
@@ -70,6 +71,19 @@ create table if not exists public.bookings (
 
 create index if not exists bookings_schedule_idx on public.bookings (booking_date, start_time, end_time);
 create index if not exists bookings_phone_code_idx on public.bookings (phone_digits, code);
+
+create table if not exists public.clients (
+  id uuid primary key default gen_random_uuid(),
+  client_name text not null,
+  client_phone text not null,
+  phone_digits text not null unique,
+  profile_photo text not null default '',
+  notes text not null default '',
+  first_seen_at timestamptz not null default now(),
+  last_seen_at timestamptz not null default now(),
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
 
 -- Impede sobreposição de agendamentos ativos do mesmo profissional no banco.
 -- Essa é a proteção definitiva quando o site estiver conectado ao Supabase.
@@ -105,14 +119,26 @@ create table if not exists public.portfolio (
 create table if not exists public.testimonials (
   id uuid primary key default gen_random_uuid(),
   client_name text not null,
+  client_phone text not null default '',
+  phone_digits text not null default '',
   service_name text not null default 'Atendimento Legado',
   testimonial text not null,
   rating integer not null default 5 check (rating between 1 and 5),
-  active boolean not null default true,
+  profile_photo text not null default '',
+  status text not null default 'pending' check (status in ('pending','approved','rejected')),
+  active boolean not null default false,
+  source text not null default 'admin',
   sort_order integer not null default 0,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
+
+alter table public.bookings add column if not exists client_photo text not null default '';
+alter table public.testimonials add column if not exists client_phone text not null default '';
+alter table public.testimonials add column if not exists phone_digits text not null default '';
+alter table public.testimonials add column if not exists profile_photo text not null default '';
+alter table public.testimonials add column if not exists status text not null default 'pending';
+alter table public.testimonials add column if not exists source text not null default 'admin';
 
 alter table public.profiles enable row level security;
 alter table public.business_settings enable row level security;
@@ -120,6 +146,7 @@ alter table public.services enable row level security;
 alter table public.availability enable row level security;
 alter table public.blocked_slots enable row level security;
 alter table public.bookings enable row level security;
+alter table public.clients enable row level security;
 alter table public.portfolio enable row level security;
 alter table public.testimonials enable row level security;
 
@@ -128,7 +155,7 @@ create policy "public read settings" on public.business_settings for select to a
 create policy "public read active services" on public.services for select to anon, authenticated using (active = true or auth.role() = 'authenticated');
 create policy "public read availability" on public.availability for select to anon, authenticated using (true);
 create policy "public read active portfolio" on public.portfolio for select to anon, authenticated using (active = true or auth.role() = 'authenticated');
-create policy "public read active testimonials" on public.testimonials for select to anon, authenticated using (active = true or auth.role() = 'authenticated');
+create policy "public read active testimonials" on public.testimonials for select to anon, authenticated using (active = true and status = 'approved');
 
 -- Administradores autenticados gerenciam todos os dados.
 create policy "admins manage settings" on public.business_settings for all to authenticated using (true) with check (true);
@@ -136,6 +163,7 @@ create policy "admins manage services" on public.services for all to authenticat
 create policy "admins manage availability" on public.availability for all to authenticated using (true) with check (true);
 create policy "admins manage blocks" on public.blocked_slots for all to authenticated using (true) with check (true);
 create policy "admins manage bookings" on public.bookings for all to authenticated using (true) with check (true);
+create policy "admins manage clients" on public.clients for all to authenticated using (true) with check (true);
 create policy "admins manage portfolio" on public.portfolio for all to authenticated using (true) with check (true);
 create policy "admins manage testimonials" on public.testimonials for all to authenticated using (true) with check (true);
 create policy "users read own profile" on public.profiles for select to authenticated using (auth.uid() = id);
@@ -145,6 +173,14 @@ create policy "users read own profile" on public.profiles for select to authenti
 create policy "public create pending booking" on public.bookings
 for insert to anon
 with check (status = 'pending' and char_length(phone_digits) between 10 and 13);
+
+create policy "public create client profile" on public.clients
+for insert to anon
+with check (char_length(phone_digits) between 10 and 13);
+
+create policy "public create pending testimonial" on public.testimonials
+for insert to anon
+with check (status = 'pending' and active = false and char_length(phone_digits) between 10 and 13);
 
 -- Retorna somente os intervalos ocupados, sem dados pessoais.
 create or replace function public.booked_intervals(p_date date)

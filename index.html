@@ -204,6 +204,7 @@
             <div class="field-grid">
               <label><span>Nome completo</span><input id="clientName" name="clientName" type="text" autocomplete="name" placeholder="Digite seu nome" required /></label>
               <label><span>WhatsApp</span><input id="clientPhone" name="clientPhone" type="tel" autocomplete="tel" placeholder="(64) 99999-9999" required /></label>
+              <label class="full client-photo-field"><span>Foto de perfil <small>(opcional)</small></span><input id="clientPhotoData" type="hidden" /><input id="clientPhoto" type="file" accept="image/jpeg,image/png,image/webp" /><small>Ela fica salva no seu cadastro de cliente e pode aparecer junto da sua avaliação, se você permitir.</small></label>
               <label class="full"><span>Profissional</span><select id="professional" name="professional"></select></label>
               <label class="full"><span>Observação <small>(opcional)</small></span><textarea id="notes" name="notes" rows="3" placeholder="Alguma preferência ou observação?"></textarea></label>
               <label class="consent full"><input id="privacyConsent" type="checkbox" required /><span>Concordo que meus dados sejam usados apenas para organizar este agendamento.</span></label>
@@ -246,8 +247,19 @@
       </div>
       <div class="testimonials-grid" id="testimonialsGrid"></div>
       <div class="testimonial-cta reveal">
-        <div><span class="eyebrow">JÁ FOI ATENDIDO?</span><h3>Conte como foi sua experiência.</h3><p>Seu feedback ajuda a Legado a evoluir e também ajuda novos clientes a conhecerem o trabalho.</p></div>
-        <a class="button button-secondary" id="reviewWhatsapp" href="#" target="_blank" rel="noopener">Enviar avaliação pelo WhatsApp</a>
+        <div><span class="eyebrow">JÁ FOI ATENDIDO?</span><h3>Conte como foi sua experiência.</h3><p>Seu feedback entra para análise no painel. Depois que a barbearia aprovar, ele aparece no site.</p></div>
+        <form class="review-form" id="reviewForm">
+          <div class="review-form-grid">
+            <label><span>Nome</span><input id="reviewName" type="text" placeholder="Seu nome" required /></label>
+            <label><span>WhatsApp</span><input id="reviewPhone" type="tel" placeholder="(64) 99999-9999" required /></label>
+            <label><span>Serviço</span><input id="reviewService" type="text" placeholder="Ex.: Corte + Barba" /></label>
+            <label><span>Estrelas</span><select id="reviewRating"><option value="5">5 estrelas</option><option value="4">4 estrelas</option><option value="3">3 estrelas</option><option value="2">2 estrelas</option><option value="1">1 estrela</option></select></label>
+            <label class="full"><span>Comentário</span><textarea id="reviewText" rows="3" maxlength="420" placeholder="Como foi sua experiência?" required></textarea></label>
+            <label class="full review-photo-field"><span>Foto de perfil <small>(opcional)</small></span><input id="reviewPhotoData" type="hidden" /><input id="reviewPhoto" type="file" accept="image/jpeg,image/png,image/webp" /></label>
+            <label class="consent full"><input id="reviewConsent" type="checkbox" required /><span>Autorizo a Legado a analisar e, se aprovado, publicar meu nome, avaliação e foto no site.</span></label>
+          </div>
+          <button class="button button-secondary" type="submit">Enviar avaliação para aprovação</button>
+        </form>
       </div>
     </section>
 

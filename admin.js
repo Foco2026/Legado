@@ -337,10 +337,14 @@ Confirmar ${booking.name} e cancelar automaticamente as solicitações concorren
     const search = $("#clientSearch").value.trim().toLowerCase();
     const clientSettings = L.getSettings();
     const groups = new Map();
+    L.getClients().forEach(client => {
+      if (!client.phoneDigits) return;
+      groups.set(client.phoneDigits, { ...client, bookings: [] });
+    });
     L.getBookings().forEach(booking => {
       const key = booking.phoneDigits || booking.phone;
-      if (!groups.has(key)) groups.set(key, { name: booking.name, phone: booking.phone, phoneDigits: booking.phoneDigits, bookings: [] });
-      const group = groups.get(key); group.name = booking.name || group.name; group.bookings.push(booking);
+      if (!groups.has(key)) groups.set(key, { name: booking.name, phone: booking.phone, phoneDigits: booking.phoneDigits, photo: booking.clientPhoto || "", bookings: [] });
+      const group = groups.get(key); group.name = booking.name || group.name; group.phone = booking.phone || group.phone; group.photo = booking.clientPhoto || group.photo; group.bookings.push(booking);
     });
     const clients = [...groups.values()].map(client => {
       const sorted = client.bookings.sort((a, b) => `${b.date}${b.startTime}`.localeCompare(`${a.date}${a.startTime}`));
@@ -350,7 +354,7 @@ Confirmar ${booking.name} e cancelar automaticamente as solicitações concorren
     }).filter(client => !search || `${client.name} ${client.phone}`.toLowerCase().includes(search)).sort((a, b) => a.name.localeCompare(b.name, "pt-BR"));
     $("#clientsCount").textContent = groups.size;
     $("#clientsGrid").innerHTML = clients.length ? clients.map(client => `
-      <article class="client-card" data-client-phone="${L.escapeHTML(client.phoneDigits)}"><div class="client-card-head"><div><h3>${L.escapeHTML(client.name)}</h3><p>${L.escapeHTML(client.phone)}</p></div><span class="count-pill">${client.bookings.length}</span></div>
+      <article class="client-card" data-client-phone="${L.escapeHTML(client.phoneDigits)}"><div class="client-card-head"><div class="client-profile-head">${client.photo ? `<img class="client-avatar" src="${L.escapeHTML(client.photo)}" alt="${L.escapeHTML(client.name)}" />` : `<span class="client-avatar">${L.escapeHTML(String(client.name || "CL").split(/\s+/).slice(0, 2).map(part => part[0]).join("").toUpperCase() || "CL")}</span>`}<div><h3>${L.escapeHTML(client.name)}</h3><p>${L.escapeHTML(client.phone)}</p></div></div><span class="count-pill">${client.bookings.length}</span></div>
       <div class="client-card-stats"><div><span>Concluídos</span><strong>${client.completed}</strong></div><div><span>Próximos</span><strong>${client.upcoming}</strong></div><div><span>Total</span><strong>${L.formatCurrency(client.spent)}</strong></div></div>
       <p>Último registro: ${client.last ? L.formatDate(client.last.date, { day: "2-digit", month: "short", year: "numeric" }) : "—"}</p>
       ${clientSettings.loyaltyEnabled ? `<div class="loyalty-progress"><div><span>Fidelidade</span><strong>${client.completed % Math.max(1, Number(clientSettings.loyaltyGoal) || 10)}/${Math.max(1, Number(clientSettings.loyaltyGoal) || 10)}</strong></div><i style="width:${Math.min(100,(client.completed % Math.max(1, Number(clientSettings.loyaltyGoal) || 10))/Math.max(1, Number(clientSettings.loyaltyGoal) || 10)*100)}%"></i><small>${L.escapeHTML(clientSettings.loyaltyReward || "Benefício configurado")}</small></div>` : ""}
@@ -633,14 +637,26 @@ Confirmar ${booking.name} e cancelar automaticamente as solicitações concorren
   });
 
   function resetTestimonialForm() {
-    $("#testimonialForm").reset(); $("#testimonialId").value = ""; $("#testimonialActive").checked = true; $("#testimonialRating").value = "5"; $("#testimonialOrder").value = String(L.getTestimonials(true).length + 1); $("#testimonialFormTitle").textContent = "Adicionar avaliação";
+    $("#testimonialForm").reset(); $("#testimonialId").value = ""; $("#testimonialPhoto").value = ""; $("#testimonialPhone").value = ""; $("#testimonialActive").checked = true; $("#testimonialRating").value = "5"; $("#testimonialOrder").value = String(L.getTestimonials(true).length + 1); $("#testimonialFormTitle").textContent = "Adicionar avaliação";
   }
 
   function renderTestimonialsAdmin() {
     const items = L.getTestimonials(true);
     $("#testimonialsCount").textContent = items.length;
+    if ($("#pendingTestimonialsCount")) $("#pendingTestimonialsCount").textContent = items.filter(item => item.status === "pending").length;
     $("#testimonialAdminList").innerHTML = items.length ? items.map(item => `
-      <article class="testimonial-admin-item ${item.active ? "" : "inactive"}" data-testimonial-admin-id="${L.escapeHTML(item.id)}"><div class="testimonial-admin-stars">${"★".repeat(item.rating)}${"☆".repeat(5-item.rating)}</div><blockquote>${L.escapeHTML(item.text)}</blockquote><div><strong>${L.escapeHTML(item.name)}</strong><span>${L.escapeHTML(item.service)} · ordem ${item.order} · ${item.active ? "publicado" : "oculto"}</span></div><div class="management-actions"><button class="icon-action" data-testimonial-action="edit" type="button">Editar</button><button class="icon-action" data-testimonial-action="toggle" type="button">${item.active ? "Ocultar" : "Publicar"}</button><button class="icon-action danger" data-testimonial-action="delete" type="button">Excluir</button></div></article>`).join("") : '<div class="empty-admin"><strong>Nenhuma avaliação</strong>Cadastre depoimentos reais autorizados pelos clientes.</div>';
+      <article class="testimonial-admin-item ${item.active ? "" : "inactive"} ${item.status === "pending" ? "pending-review" : ""}" data-testimonial-admin-id="${L.escapeHTML(item.id)}">
+        <div class="testimonial-admin-head">${item.photo ? `<img class="testimonial-admin-avatar" src="${L.escapeHTML(item.photo)}" alt="${L.escapeHTML(item.name)}" />` : ""}<div><div class="testimonial-admin-stars">${"★".repeat(item.rating)}${"☆".repeat(5-item.rating)}</div><span class="status-badge status-${item.status === "approved" ? "completed" : item.status === "rejected" ? "cancelled" : "pending"}">${item.status === "approved" ? "Aprovada" : item.status === "rejected" ? "Rejeitada" : "Pendente"}</span></div></div>
+        <blockquote>${L.escapeHTML(item.text)}</blockquote>
+        <div><strong>${L.escapeHTML(item.name)}</strong><span>${L.escapeHTML(item.service)} · ${item.phone ? `${L.escapeHTML(item.phone)} · ` : ""}ordem ${item.order} · ${item.source === "site" ? "enviada pelo site" : "criada no admin"}</span></div>
+        <div class="management-actions">
+          ${item.status !== "approved" ? '<button class="icon-action confirm-action" data-testimonial-action="approve" type="button">Aprovar</button>' : ""}
+          <button class="icon-action" data-testimonial-action="edit" type="button">Editar</button>
+          <button class="icon-action" data-testimonial-action="toggle" type="button">${item.active ? "Ocultar" : "Publicar"}</button>
+          ${item.status !== "rejected" ? '<button class="icon-action danger" data-testimonial-action="reject" type="button">Rejeitar</button>' : ""}
+          <button class="icon-action danger" data-testimonial-action="delete" type="button">Excluir</button>
+        </div>
+      </article>`).join("") : '<div class="empty-admin"><strong>Nenhuma avaliação</strong>As avaliações enviadas pelo site aparecerão aqui para aprovação.</div>';
   }
 
   $("#testimonialForm").addEventListener("submit", event => {
@@ -648,16 +664,21 @@ Confirmar ${booking.name} e cancelar automaticamente as solicitações concorren
     const name = $("#testimonialName").value.trim(); const text = $("#testimonialText").value.trim();
     if (name.length < 2 || text.length < 8) return showToast("Informe o nome e um depoimento válido.", true);
     const id = $("#testimonialId").value || `testimonial-${Date.now()}`; const items = L.getTestimonials(true); const existing = items.find(item => item.id === id);
-    const item = L.normalizeTestimonial({ ...existing, id, name, text, service: $("#testimonialService").value.trim() || "Atendimento Legado", rating: Number($("#testimonialRating").value), order: Number($("#testimonialOrder").value) || items.length + 1, active: $("#testimonialActive").checked });
+    const active = $("#testimonialActive").checked;
+    const phone = $("#testimonialPhone").value || existing?.phone || "";
+    const item = L.normalizeTestimonial({ ...existing, id, name, text, phone, phoneDigits: L.normalizePhone(phone), photo: $("#testimonialPhoto").value || existing?.photo || "", service: $("#testimonialService").value.trim() || "Atendimento Legado", rating: Number($("#testimonialRating").value), order: Number($("#testimonialOrder").value) || items.length + 1, active, status: active ? "approved" : "pending", source: existing?.source || "admin", updatedAt: new Date().toISOString() });
     const index = items.findIndex(current => current.id === id); if (index >= 0) items[index] = item; else items.push(item);
+    if (item.phoneDigits) L.upsertClient({ name: item.name, phone: item.phone, phoneDigits: item.phoneDigits, photo: item.photo });
     L.setTestimonials(items); resetTestimonialForm(); showToast("Avaliação salva.");
   });
   $("#resetTestimonialForm").addEventListener("click", resetTestimonialForm);
   $("#testimonialAdminList").addEventListener("click", event => {
     const row = event.target.closest("[data-testimonial-admin-id]"); const action = event.target.closest("[data-testimonial-action]")?.dataset.testimonialAction; if (!row || !action) return;
     const items = L.getTestimonials(true); const item = items.find(current => current.id === row.dataset.testimonialAdminId); if (!item) return;
-    if (action === "edit") { $("#testimonialId").value = item.id; $("#testimonialName").value = item.name; $("#testimonialService").value = item.service; $("#testimonialText").value = item.text; $("#testimonialRating").value = String(item.rating); $("#testimonialOrder").value = item.order; $("#testimonialActive").checked = item.active; $("#testimonialFormTitle").textContent = "Editar avaliação"; $("#testimonialForm").scrollIntoView({ behavior: "smooth", block: "start" }); }
-    if (action === "toggle") { item.active = !item.active; L.setTestimonials(items); showToast(item.active ? "Avaliação publicada." : "Avaliação ocultada."); }
+    if (action === "edit") { $("#testimonialId").value = item.id; $("#testimonialName").value = item.name; $("#testimonialPhone").value = item.phone || ""; $("#testimonialPhoto").value = item.photo || ""; $("#testimonialService").value = item.service; $("#testimonialText").value = item.text; $("#testimonialRating").value = String(item.rating); $("#testimonialOrder").value = item.order; $("#testimonialActive").checked = item.active && item.status === "approved"; $("#testimonialFormTitle").textContent = "Editar avaliação"; $("#testimonialForm").scrollIntoView({ behavior: "smooth", block: "start" }); }
+    if (action === "approve") { item.active = true; item.status = "approved"; item.updatedAt = new Date().toISOString(); L.setTestimonials(items); if (item.phoneDigits) L.upsertClient({ name: item.name, phone: item.phone, phoneDigits: item.phoneDigits, photo: item.photo }); showToast("Avaliação aprovada e publicada."); }
+    if (action === "reject") { item.active = false; item.status = "rejected"; item.updatedAt = new Date().toISOString(); L.setTestimonials(items); showToast("Avaliação rejeitada."); }
+    if (action === "toggle") { item.active = !item.active; item.status = item.active ? "approved" : "pending"; item.updatedAt = new Date().toISOString(); L.setTestimonials(items); showToast(item.active ? "Avaliação publicada." : "Avaliação ocultada."); }
     if (action === "delete") { if (!window.confirm(`Excluir o depoimento de ${item.name}?`)) return; L.setTestimonials(items.filter(current => current.id !== item.id)); resetTestimonialForm(); showToast("Avaliação excluída."); }
   });
 

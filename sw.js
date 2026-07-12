@@ -1,6 +1,6 @@
-const CACHE = "legado-v26-layout-premium";
+const CACHE = "legado-v29-config-mobile";
 const ASSETS = [
-  "./", "./index.html", "./admin.html", "./privacidade.html", "./styles.css", "./admin.css", "./core.js", "./app.js", "./admin.js", "./manifest.webmanifest",
+  "./", "./index.html", "./admin.html", "./privacidade.html", "./styles.css", "./admin.css", "./core.js", "./app.js", "./admin.js", "./supabase-bridge.js", "./manifest.webmanifest",
   "./assets/logo.png", "./assets/logo-192.png", "./assets/logo-512.png", "./assets/favicon.png", "./assets/gilliel-apresentacao.webp", "./assets/corte.webp", "./assets/barba.webp", "./assets/produtos.webp", "./assets/agendamento.webp"
 ];
 self.addEventListener("install", event => event.waitUntil(caches.open(CACHE).then(cache => cache.addAll(ASSETS)).then(() => self.skipWaiting())));

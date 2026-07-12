@@ -209,20 +209,22 @@
           </section>
 
           <section class="admin-panel" data-panel="testimonials">
-            <div class="panel-heading"><div><span class="eyebrow">PROVA SOCIAL</span><h2>Avaliações</h2><p>Cadastre somente depoimentos reais autorizados pelos clientes.</p></div><button class="button button-small button-secondary" type="button" id="resetTestimonialForm">Novo depoimento</button></div>
-            <div class="admin-help-strip"><span>Importante</span><p>Publique apenas avaliações autorizadas. Use nome abreviado quando o cliente preferir privacidade, como “Carlos M.”.</p></div>
+            <div class="panel-heading"><div><span class="eyebrow">PROVA SOCIAL</span><h2>Avaliações</h2><p>Clientes podem enviar pelo site. Você aprova antes de publicar.</p></div><button class="button button-small button-secondary" type="button" id="resetTestimonialForm">Novo depoimento</button></div>
+            <div class="admin-help-strip"><span>Moderação</span><p>Novas avaliações chegam como pendentes e não aparecem no site. Revise o texto, confira a foto e clique em aprovar para publicar.</p></div>
             <div class="management-grid">
               <form class="admin-card management-form" id="testimonialForm">
                 <div class="card-heading"><div><span class="eyebrow">DEPOIMENTO</span><h3 id="testimonialFormTitle">Adicionar avaliação</h3></div></div>
                 <input id="testimonialId" type="hidden" />
+                <input id="testimonialPhoto" type="hidden" />
+                <input id="testimonialPhone" type="hidden" />
                 <label><span>Nome do cliente</span><input id="testimonialName" type="text" placeholder="Ex.: Carlos M." required /></label>
                 <label><span>Serviço realizado</span><input id="testimonialService" type="text" placeholder="Ex.: Corte + Barba" /></label>
                 <label><span>Depoimento</span><textarea id="testimonialText" rows="5" maxlength="420" placeholder="Digite o feedback autorizado pelo cliente." required></textarea></label>
                 <div class="admin-field-grid"><label><span>Avaliação</span><select id="testimonialRating"><option value="5">5 estrelas</option><option value="4">4 estrelas</option><option value="3">3 estrelas</option><option value="2">2 estrelas</option><option value="1">1 estrela</option></select></label><label><span>Ordem</span><input id="testimonialOrder" type="number" min="1" value="1" /></label></div>
-                <label class="toggle-label"><input id="testimonialActive" type="checkbox" checked /><span>Exibir no site</span></label>
+                <label class="toggle-label"><input id="testimonialActive" type="checkbox" checked /><span>Aprovada e visível no site</span></label>
                 <button class="button" type="submit">Salvar avaliação</button>
               </form>
-              <div class="admin-card"><div class="card-heading"><div><span class="eyebrow">PUBLICAÇÃO</span><h3>Depoimentos cadastrados</h3></div><strong class="count-pill" id="testimonialsCount">0</strong></div><div class="testimonial-admin-list" id="testimonialAdminList"></div></div>
+              <div class="admin-card"><div class="card-heading"><div><span class="eyebrow">PUBLICAÇÃO</span><h3>Depoimentos cadastrados</h3><p><strong id="pendingTestimonialsCount">0</strong> aguardando aprovação</p></div><strong class="count-pill" id="testimonialsCount">0</strong></div><div class="testimonial-admin-list" id="testimonialAdminList"></div></div>
             </div>
           </section>
 
