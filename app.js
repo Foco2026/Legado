@@ -122,8 +122,15 @@
 
   function renderPortfolio() {
     const items = L.getPortfolio();
+    const section = $("#portfolio");
     const filters = $("#portfolioFilters");
     const grid = $("#portfolioGrid");
+    if (section) section.classList.toggle("hidden", !items.length);
+    if (!items.length) {
+      filters.innerHTML = "";
+      grid.innerHTML = "";
+      return;
+    }
     $("#portfolioEyebrow").textContent = settings.portfolioEyebrow;
     $("#portfolioTitle").textContent = settings.portfolioTitle;
     $("#portfolioText").textContent = settings.portfolioText;
@@ -132,7 +139,7 @@
     filters.innerHTML = items.length ? categories.map(category => `<button class="portfolio-filter ${category === portfolioCategory ? "active" : ""}" type="button" data-portfolio-filter="${L.escapeHTML(category)}">${L.escapeHTML(category)}</button>`).join("") : "";
     filters.classList.toggle("hidden", !items.length);
     const visible = portfolioCategory === "Todos" ? items : items.filter(item => item.category === portfolioCategory);
-    grid.innerHTML = visible.length ? visible.map(item => {
+    grid.innerHTML = visible.map(item => {
       const galleryCount = Array.isArray(item.images) ? item.images.length : 1;
       return `
       <article class="portfolio-card reveal ${item.featured ? "featured" : ""}" data-portfolio-id="${L.escapeHTML(item.id)}" tabindex="0" role="button" aria-label="Abrir ${L.escapeHTML(item.title)}">
@@ -141,7 +148,7 @@
         <span class="portfolio-open" aria-hidden="true">↗</span>
         <div class="portfolio-card-content"><span>${L.escapeHTML(item.category)}</span><h3>${L.escapeHTML(item.title)}</h3><p>${L.escapeHTML(item.summary || item.description)}</p></div>
       </article>`;
-    }).join("") : '<div class="portfolio-empty portfolio-empty-real"><span class="eyebrow">FOTOS REAIS EM BREVE</span><strong>O portfólio está sendo preparado.</strong><p>As fotos dos cortes, barbas e acabamentos feitos na Legado serão publicadas aqui pelo administrador.</p></div>';
+    }).join("");
     observeReveals();
   }
 
@@ -164,18 +171,23 @@
 
   function renderTestimonials() {
     const items = L.getTestimonials();
+    const section = $("#avaliacoes");
+    if (section) section.classList.toggle("hidden", !items.length);
+    if (!items.length) {
+      $("#testimonialsGrid").innerHTML = "";
+      return;
+    }
     $("#testimonialsEyebrow").textContent = settings.testimonialsEyebrow;
     $("#testimonialsTitle").textContent = settings.testimonialsTitle;
     $("#testimonialsText").textContent = settings.testimonialsText;
-    $("#testimonialsGrid").innerHTML = items.length ? items.map(item => `
+    $("#testimonialsGrid").innerHTML = items.map(item => `
       <article class="testimonial-card reveal">
         <div class="testimonial-stars" aria-label="${item.rating} de 5 estrelas">${"★".repeat(item.rating)}${"☆".repeat(5-item.rating)}</div>
         <blockquote>${L.escapeHTML(item.text)}</blockquote>
-        <div class="testimonial-author"><strong>${L.escapeHTML(item.name)}</strong><span>${L.escapeHTML(item.service)}</span></div>
-      </article>`).join("") : `<div class="testimonials-empty reveal"><strong>As avaliações reais entram aqui</strong><span>Acompanhe os trabalhos e feedbacks no Instagram ${L.escapeHTML(settings.instagram)}.</span></div>`;
+        <div class="testimonial-author"><strong>${L.escapeHTML(item.name)}</strong><span>${L.escapeHTML(item.service)}${item.createdAt ? ` · ${L.escapeHTML(L.formatDate(item.createdAt.slice(0, 10), { month: "short", year: "numeric" }))}` : ""}</span></div>
+      </article>`).join("");
     observeReveals();
   }
-
   function serviceMeta(service) {
     const pieces = [`${service.durationMinutes} min`];
     if (settings.showPrices && service.price > 0) pieces.push(L.formatCurrency(service.price));
@@ -190,13 +202,13 @@
     }
     elements.publicServices.innerHTML = services.map(service => `
       <article class="service-card reveal" data-service-card="${L.escapeHTML(service.id)}" tabindex="0" role="button" aria-label="Agendar ${L.escapeHTML(service.name)}">
-        <img src="${L.escapeHTML(L.resolveMediaSource(service.icon))}" alt="Ícone do serviço ${L.escapeHTML(service.name)}" />
+        <img src="${L.escapeHTML(L.resolveMediaSource(service.icon))}" alt="Ícone do serviço ${L.escapeHTML(service.name)}" loading="lazy" />
         <div><h3>${L.escapeHTML(service.name)}</h3><p>${L.escapeHTML(service.description)}</p></div>
         <span>${service.durationMinutes} minutos${settings.showPrices && service.price > 0 ? ` · <b class="price-tag">${L.escapeHTML(L.formatCurrency(service.price))}</b>` : ""}</span>
+        <strong class="service-select-cta">Selecionar</strong>
       </article>`).join("");
     observeReveals();
   }
-
   function buildServiceChoices() {
     elements.serviceChoices.innerHTML = services.map(service => `
       <button type="button" class="choice ${state.serviceId === service.id ? "selected" : ""}" data-service="${L.escapeHTML(service.id)}">
@@ -280,17 +292,33 @@
       elements.times.innerHTML = '<p class="availability-note">Escolha o serviço e a data para ver os horários.</p>';
       return;
     }
-    const slots = L.generateSlots(state.date, state.service.durationMinutes, { professional: elements.professional.value || settings.professional });
+    const professional = elements.professional.value || settings.professional;
+    const slots = L.generateSlots(state.date, state.service.durationMinutes, { professional }).filter(slot => slot.available !== false);
     if (!slots.length) {
       elements.times.innerHTML = '<p class="availability-note">Não há horários disponíveis para este serviço nesta data. Tente outro dia.</p>';
       return;
     }
-    elements.times.innerHTML = slots.map(slot => `
-      <button type="button" class="time-button ${state.time === slot.startTime ? "selected" : ""}" data-time="${slot.startTime}">
-        ${slot.startTime}<small>até ${slot.endTime}</small>
-      </button>`).join("");
+    const groups = [
+      { label: "Manhã", items: slots.filter(slot => L.timeToMinutes(slot.startTime) < 720) },
+      { label: "Tarde", items: slots.filter(slot => L.timeToMinutes(slot.startTime) >= 720 && L.timeToMinutes(slot.startTime) < 1080) },
+      { label: "Noite", items: slots.filter(slot => L.timeToMinutes(slot.startTime) >= 1080) }
+    ].filter(group => group.items.length);
+    elements.times.innerHTML = `
+      <div class="time-context">
+        <strong>${L.escapeHTML(state.service.name)}</strong>
+        <span>${state.service.durationMinutes} min · ${L.escapeHTML(professional)}</span>
+      </div>
+      ${groups.map(group => `
+        <section class="time-period">
+          <h4>${group.label}</h4>
+          <div class="time-period-grid">
+            ${group.items.map(slot => `
+              <button type="button" class="time-button ${state.time === slot.startTime ? "selected" : ""}" data-time="${slot.startTime}">
+                ${slot.startTime}<small>até ${slot.endTime}</small>
+              </button>`).join("")}
+          </div>
+        </section>`).join("")}`;
   }
-
   function selectTime(time) {
     if (!state.service || !state.date) return;
     if (!L.isSlotAvailable({ date: state.date, startTime: time, durationMinutes: state.service.durationMinutes, professional: elements.professional.value || settings.professional })) {
@@ -301,6 +329,7 @@
     state.time = time;
     buildTimes();
     updateSummary();
+    setTimeout(() => goToStep(4), 160);
   }
 
   function updateSummary() {
@@ -679,6 +708,37 @@
   }
   menuButton.addEventListener("click", () => setMenuOpen(!nav.classList.contains("open")));
   nav.querySelectorAll("a").forEach(link => link.addEventListener("click", () => setMenuOpen(false)));
+  document.addEventListener("click", event => {
+    if (!nav.classList.contains("open")) return;
+    if (event.target.closest(".main-nav") || event.target.closest(".menu-button")) return;
+    setMenuOpen(false);
+  });
+
+  const navLinks = Array.from(nav.querySelectorAll('a[href^="#"]'));
+  const navSections = navLinks.map(link => document.querySelector(link.getAttribute("href"))).filter(Boolean);
+  function setActiveNav(id) {
+    navLinks.forEach(link => link.classList.toggle("active", link.getAttribute("href") === `#${id}`));
+  }
+  if ("IntersectionObserver" in window) {
+    const navObserver = new IntersectionObserver(entries => {
+      const visible = entries.filter(entry => entry.isIntersecting).sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
+      if (visible?.target?.id) setActiveNav(visible.target.id);
+    }, { rootMargin: "-35% 0px -55% 0px", threshold: [.08, .18, .32] });
+    navSections.forEach(section => navObserver.observe(section));
+  }
+
+  const mobileBookingCta = $(".mobile-booking-cta");
+  const bookingSection = $("#agendar");
+  function updateMobileCta() {
+    if (!mobileBookingCta || !bookingSection) return;
+    const box = bookingSection.getBoundingClientRect();
+    const insideBooking = box.top < window.innerHeight * .72 && box.bottom > window.innerHeight * .28;
+    const nearBottom = window.innerHeight + window.scrollY > document.documentElement.scrollHeight - 180;
+    mobileBookingCta.classList.toggle("is-hidden", insideBooking || nearBottom);
+  }
+  window.addEventListener("scroll", updateMobileCta, { passive: true });
+  window.addEventListener("resize", updateMobileCta);
+  updateMobileCta();
   document.addEventListener("keydown", event => {
     if (event.key === "Escape") {
       setMenuOpen(false);

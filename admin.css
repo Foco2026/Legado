@@ -176,3 +176,29 @@
   .modal{padding:10px}.modal-card.booking-editor{width:100%;padding:20px 14px;border-radius:18px}.admin-toast{left:12px;right:12px;bottom:12px;max-width:none;font-size:11px}
 }
 @media(max-width:380px){.booking-actions,.management-actions{grid-template-columns:1fr}.admin-command{grid-template-columns:1fr}.calendar-nav,.calendar-view-switch{grid-template-columns:1fr}}
+
+/* Acabamento premium do painel */
+.admin-card,.filters-card,.booking-table-card,.calendar-shell{backdrop-filter:blur(12px)}
+.admin-command,.stat-card,.quick-card,.management-item,.portfolio-admin-item{transition:transform .18s ease,border-color .18s ease,box-shadow .18s ease}
+.admin-command:hover,.quick-card:hover,.management-item:hover,.portfolio-admin-item:hover{transform:translateY(-2px);border-color:rgba(239,215,126,.45);box-shadow:0 16px 32px rgba(0,0,0,.18)}
+.stat-card{background:linear-gradient(150deg,rgba(17,48,74,.86),rgba(5,18,31,.95))}
+.stat-card span,.card-heading p,.panel-heading p{line-height:1.6}
+.calendar-booking{border-radius:12px}
+.calendar-booking-actions{display:flex;gap:7px;justify-content:flex-end;flex-wrap:wrap}
+.booking-row:not(.header){transition:transform .18s ease,border-color .18s ease,background .18s ease}
+.booking-row:not(.header):hover{transform:translateY(-1px);border-color:rgba(239,215,126,.28);background:rgba(215,180,74,.04)}
+.admin-mobile-nav{box-shadow:0 12px 34px rgba(0,0,0,.22)}
+
+@media(max-width:700px){
+  .admin-command-bar{gap:9px}
+  .admin-command{border-radius:14px}
+  .stats-grid{gap:9px}
+  .stat-card{min-height:auto;padding:14px}
+  .overview-grid{gap:10px}
+  .admin-panel.active{animation:adminPanelIn .2s ease}
+  .calendar-booking{gap:9px}
+  .calendar-booking-actions{display:grid;grid-template-columns:1fr 1fr}
+  .calendar-booking-actions button{width:100%;min-height:38px}
+  .booking-row:not(.header){border-radius:15px}
+  .admin-tutorial-card,.tutorial-check-item{border-radius:14px}
+}
