@@ -126,3 +126,15 @@ Tudo continua funcionando sem Supabase; os dados permanecem no navegador até a 
 - A edição não abre mais diretamente a partir do calendário mensal/semanal.
 - Na visão diária, cada atendimento possui o botão explícito “Ver detalhes / editar”.
 - A visão diária mostra totais de agendamentos ativos, pendentes e confirmados.
+
+## V31 — Correção da conexão Supabase
+
+- Corrigido o uso da chave `sb_publishable_`, que não é um JWT de usuário.
+- O cabeçalho `Authorization` agora recebe somente o token da sessão autenticada.
+- Login administrativo mostra o erro real retornado pelo Supabase.
+- Sessão autenticada é restaurada ao atualizar a página.
+- Agendamentos públicos são criados por RPC atômica no banco.
+- Horários ocupados são consultados online antes da reserva.
+- Consulta e cancelamento por WhatsApp + código funcionam entre aparelhos.
+- Service Worker atualizado para não manter JavaScript antigo em cache.
+- Adicionado `supabase-fix.sql` para corrigir projetos já criados.

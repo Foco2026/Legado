@@ -33,6 +33,40 @@
   let toastTimer = null;
   let statusInterval = null;
   let testimonialsTimer = null;
+  let bookingSubmissionInProgress = false;
+  let remoteAvailabilityLoading = false;
+  const remoteBookedIntervals = new Map();
+
+  function remoteAvailabilityKey(date = state.date, professional = elements.professional?.value || settings.professional) {
+    return `${date || ""}|${String(professional || "").trim().toLocaleLowerCase("pt-BR")}`;
+  }
+
+  function remoteSlotConflict(startTime, durationMinutes, date = state.date, professional = elements.professional?.value || settings.professional) {
+    const intervals = remoteBookedIntervals.get(remoteAvailabilityKey(date, professional)) || [];
+    const start = L.timeToMinutes(startTime);
+    const end = start + Number(durationMinutes || 0) + Number(availability.bufferMinutes || 0);
+    return intervals.some(interval => {
+      const existingStart = L.timeToMinutes(interval.startTime);
+      const existingEnd = L.timeToMinutes(interval.endTime) + Number(availability.bufferMinutes || 0);
+      return start < existingEnd && existingStart < end;
+    });
+  }
+
+  async function refreshRemoteAvailability(date = state.date, professional = elements.professional?.value || settings.professional) {
+    if (!date || !window.LegadoSupabase?.getBookedIntervals) return;
+    const key = remoteAvailabilityKey(date, professional);
+    remoteAvailabilityLoading = true;
+    buildTimes();
+    try {
+      remoteBookedIntervals.set(key, await window.LegadoSupabase.getBookedIntervals(date, professional));
+    } catch (error) {
+      console.warn("Agenda online:", error.message);
+      showToast("Não foi possível consultar a agenda online. Tente novamente.", true);
+    } finally {
+      remoteAvailabilityLoading = false;
+      buildTimes();
+    }
+  }
 
   function showToast(message, error = false) {
     clearTimeout(toastTimer);
@@ -366,6 +400,7 @@
     buildDates();
     buildTimes();
     updateSummary();
+    refreshRemoteAvailability(date).catch(() => {});
     return true;
   }
 
@@ -375,7 +410,13 @@
       return;
     }
     const professional = elements.professional.value || settings.professional;
-    const slots = L.generateSlots(state.date, state.service.durationMinutes, { professional }).filter(slot => slot.available !== false);
+    if (remoteAvailabilityLoading && window.LegadoSupabase?.getBookedIntervals) {
+      elements.times.innerHTML = '<p class="availability-note">Consultando a agenda online...</p>';
+      return;
+    }
+    const slots = L.generateSlots(state.date, state.service.durationMinutes, { professional })
+      .filter(slot => slot.available !== false)
+      .filter(slot => !remoteSlotConflict(slot.startTime, state.service.durationMinutes, state.date, professional));
     if (!slots.length) {
       elements.times.innerHTML = '<p class="availability-note">Não há horários disponíveis para este serviço nesta data. Tente outro dia.</p>';
       return;
@@ -403,7 +444,7 @@
   }
   function selectTime(time) {
     if (!state.service || !state.date) return;
-    if (!L.isSlotAvailable({ date: state.date, startTime: time, durationMinutes: state.service.durationMinutes, professional: elements.professional.value || settings.professional })) {
+    if (!L.isSlotAvailable({ date: state.date, startTime: time, durationMinutes: state.service.durationMinutes, professional: elements.professional.value || settings.professional }) || remoteSlotConflict(time, state.service.durationMinutes)) {
       buildTimes();
       showToast("Esse horário não está mais disponível.", true);
       return;
@@ -461,7 +502,7 @@
     if (state.step === 1 && !state.service) return showInlineMessage("Selecione um serviço.");
     if (state.step === 2 && !state.date) return showInlineMessage("Escolha uma data.");
     if (state.step === 3 && !state.time) return showInlineMessage("Selecione um horário disponível.");
-    if (state.step === 3 && !L.isSlotAvailable({ date: state.date, startTime: state.time, durationMinutes: state.service.durationMinutes, professional: elements.professional.value || settings.professional })) {
+    if (state.step === 3 && (!L.isSlotAvailable({ date: state.date, startTime: state.time, durationMinutes: state.service.durationMinutes, professional: elements.professional.value || settings.professional }) || remoteSlotConflict(state.time, state.service.durationMinutes))) {
       state.time = "";
       buildTimes();
       return showInlineMessage("Esse horário ficou indisponível. Escolha outro.");
@@ -489,15 +530,19 @@
     elements.next.textContent = state.step === 4 ? (state.rebookingId ? "Confirmar reagendamento" : "Confirmar agendamento") : "Continuar";
   }
 
-  function createBooking() {
-    if (!L.isSlotAvailable({ date: state.date, startTime: state.time, durationMinutes: state.service.durationMinutes, professional: elements.professional.value || settings.professional })) {
+  async function createBooking() {
+    if (bookingSubmissionInProgress) return;
+    const professional = elements.professional.value || settings.professional;
+    if (!L.isSlotAvailable({ date: state.date, startTime: state.time, durationMinutes: state.service.durationMinutes, professional }) || remoteSlotConflict(state.time, state.service.durationMinutes, state.date, professional)) {
       state.time = "";
       goToStep(3);
       showInlineMessage("Esse horário já foi reservado. Escolha outro.");
+      refreshRemoteAvailability().catch(() => {});
       return;
     }
+
     const now = new Date().toISOString();
-    const reservation = L.reserveBooking({
+    const candidate = {
       id: `${Date.now()}-${Math.random().toString(16).slice(2)}`,
       code: L.makeCode(),
       serviceId: state.service.id,
@@ -512,32 +557,63 @@
       name: $("#clientName").value.trim(),
       phone: L.formatPhone($("#clientPhone").value),
       clientPhoto: $("#clientPhotoData")?.value || "",
-      professional: elements.professional.value || settings.professional,
+      professional,
       notes: $("#notes").value.trim(),
       status: "pending",
       createdAt: now,
       updatedAt: now,
       rescheduledFrom: state.rebookingId,
       source: "site"
-    });
-    if (!reservation.ok) {
-      state.time = "";
-      goToStep(3);
-      buildTimes();
-      showInlineMessage("Esse horário acabou de ser reservado. Escolha outro.");
-      return;
-    }
-    const booking = reservation.booking;
+    };
 
-    if (state.rebookingId) {
-      const original = L.getBookings().find(item => String(item.id) === String(state.rebookingId));
-      if (original) L.upsertBooking({ ...original, status: "cancelled", cancellationReason: `Reagendado para ${booking.code}`, updatedAt: now });
-    }
+    bookingSubmissionInProgress = true;
+    elements.next.disabled = true;
+    elements.next.textContent = "Salvando...";
+    let reservation;
+    try {
+      if (window.LegadoSupabase?.createBooking) {
+        reservation = await window.LegadoSupabase.createBooking(candidate);
+      } else {
+        reservation = L.reserveBooking(candidate);
+      }
 
-    lastBooking = booking;
-    L.upsertClient({ name: booking.name, phone: booking.phone, phoneDigits: booking.phoneDigits, photo: booking.clientPhoto });
-    showConfirmation(booking);
-    state.rebookingId = null;
+      if (!reservation?.ok) {
+        if (reservation?.reason === "conflict") {
+          state.time = "";
+          goToStep(3);
+          buildTimes();
+          showInlineMessage("Esse horário acabou de ser reservado. Escolha outro.");
+          refreshRemoteAvailability().catch(() => {});
+          return;
+        }
+        showToast("Não foi possível salvar no Supabase. Verifique a conexão e tente novamente.", true);
+        return;
+      }
+
+      const booking = reservation.booking;
+      if (state.rebookingId) {
+        const previous = L.getBookings().find(item => String(item.id) === String(state.rebookingId));
+        if (previous) {
+          if (window.LegadoSupabase?.cancelBooking) {
+            const cancellation = await window.LegadoSupabase.cancelBooking(previous.phoneDigits || previous.phone, previous.code).catch(() => null);
+            if (!cancellation?.ok) L.upsertBooking({ ...previous, status: "cancelled", cancellationReason: `Reagendado para ${booking.code}`, updatedAt: now });
+          } else {
+            L.upsertBooking({ ...previous, status: "cancelled", cancellationReason: `Reagendado para ${booking.code}`, updatedAt: now });
+          }
+        }
+      }
+
+      lastBooking = booking;
+      L.upsertClient({ name: booking.name, phone: booking.phone, phoneDigits: booking.phoneDigits, photo: booking.clientPhoto });
+      showConfirmation(booking);
+      state.rebookingId = null;
+      remoteBookedIntervals.delete(remoteAvailabilityKey(booking.date, booking.professional));
+      refreshRemoteAvailability(booking.date, booking.professional).catch(() => {});
+    } finally {
+      bookingSubmissionInProgress = false;
+      elements.next.disabled = false;
+      goToStep(state.step);
+    }
   }
 
   function showConfirmation(booking) {
@@ -710,19 +786,27 @@
     showToast("Escolha a nova data e o novo horário. O anterior será cancelado após a confirmação.");
   }
 
-  function cancelBooking(booking) {
+  async function cancelBooking(booking) {
     if (!L.canClientCancel(booking)) { showToast("O prazo para cancelamento pelo site terminou.", true); return; }
     if (!window.confirm("Deseja realmente cancelar este agendamento?")) return;
-    const updated = L.upsertBooking({ ...booking, status: "cancelled", cancellationReason: "Cancelado pelo cliente", updatedAt: new Date().toISOString() });
+    let updated;
+    if (window.LegadoSupabase?.cancelBooking) {
+      const result = await window.LegadoSupabase.cancelBooking(booking.phoneDigits || booking.phone, booking.code).catch(error => ({ ok: false, error: error.message }));
+      if (!result?.ok) { showToast("Não foi possível cancelar no Supabase. Tente novamente.", true); return; }
+      updated = result.booking;
+    } else {
+      updated = L.upsertBooking({ ...booking, status: "cancelled", cancellationReason: "Cancelado pelo cliente", updatedAt: new Date().toISOString() });
+    }
     renderLookup(updated);
     showToast("Agendamento cancelado.");
+    remoteBookedIntervals.delete(remoteAvailabilityKey(updated.date, updated.professional));
     openWhatsApp(updated, "Olá! Cancelei este agendamento pelo site da Legado Barbearia.");
   }
 
-  elements.next.addEventListener("click", () => {
+  elements.next.addEventListener("click", async () => {
     if (!validateStep()) return;
     if (state.step < 4) goToStep(state.step + 1);
-    else createBooking();
+    else await createBooking();
   });
   elements.prev.addEventListener("click", () => goToStep(state.step - 1));
   elements.serviceChoices.addEventListener("click", event => {
@@ -773,11 +857,16 @@
     url.searchParams.set("telefone", lastBooking.phoneDigits || L.normalizePhone(lastBooking.phone));
     url.searchParams.set("codigo", lastBooking.code);
     url.hash = "meus-horarios";
-    try { await navigator.clipboard.writeText(url.toString()); showToast("Link de consulta copiado. Ele funciona neste aparelho até a conexão online."); }
+    try { await navigator.clipboard.writeText(url.toString()); showToast("Link de consulta online copiado."); }
     catch { showToast("Não foi possível copiar o link.", true); }
   });
 
-  elements.professional.addEventListener("change", () => { state.time = ""; buildTimes(); updateSummary(); });
+  elements.professional.addEventListener("change", () => {
+    state.time = "";
+    buildTimes();
+    updateSummary();
+    refreshRemoteAvailability().catch(() => {});
+  });
   [$("#clientPhone"), $("#lookupPhone"), $("#reviewPhone"), $("#profilePhone")].filter(Boolean).forEach(input => input.addEventListener("input", () => {
     formatInputPhone(input);
     const client = findClientByPhone(input.value);
@@ -801,18 +890,22 @@
       showToast(error.message, true);
     }
   });
-  $("#profileForm")?.addEventListener("submit", event => {
+  $("#profileForm")?.addEventListener("submit", async event => {
     event.preventDefault();
     const name = $("#profileName").value.trim();
     const phone = L.formatPhone($("#profilePhone").value);
     const phoneDigits = L.normalizePhone(phone);
     if (name.length < 2) return showToast("Informe seu nome para salvar o cadastro.", true);
     if (phoneDigits.length < 10) return showToast("Informe um WhatsApp válido.", true);
-    const client = L.upsertClient({ name, phone, phoneDigits, photo: $("#profilePhotoData").value || "", notes: $("#profileNotes").value.trim() });
+    let client = L.upsertClient({ name, phone, phoneDigits, photo: $("#profilePhotoData").value || "", notes: $("#profileNotes").value.trim() });
+    if (window.LegadoSupabase?.saveClientProfile) {
+      try { client = await window.LegadoSupabase.saveClientProfile(client); }
+      catch (error) { showToast("Cadastro salvo neste aparelho, mas não foi sincronizado.", true); }
+    }
     applyClientProfile(client, "all");
     showToast("Cadastro salvo. Seus próximos agendamentos ficam mais rápidos.");
   });
-  $("#reviewForm")?.addEventListener("submit", event => {
+  $("#reviewForm")?.addEventListener("submit", async event => {
     event.preventDefault();
     const name = $("#reviewName").value.trim();
     const phone = L.formatPhone($("#reviewPhone").value);
@@ -825,7 +918,7 @@
     const existingClient = L.getClients().find(client => client.phoneDigits === phoneDigits);
     const photo = existingClient?.photo || "";
     const items = L.getTestimonials(true);
-    items.push(L.normalizeTestimonial({
+    const testimonial = L.normalizeTestimonial({
       id: `testimonial-${Date.now()}-${Math.random().toString(16).slice(2)}`,
       name,
       phone,
@@ -840,18 +933,30 @@
       order: items.length + 1,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString()
-    }));
+    });
+    if (window.LegadoSupabase?.submitTestimonial) {
+      try { await window.LegadoSupabase.submitTestimonial(testimonial); }
+      catch (error) { showToast("Não foi possível enviar a avaliação ao Supabase.", true); return; }
+    }
+    items.push(testimonial);
     L.setTestimonials(items);
     L.upsertClient({ name, phone, phoneDigits, photo, notes: existingClient?.notes || "" });
     $("#reviewForm").reset();
     showToast("Avaliação enviada. Ela aparecerá no site depois da aprovação.");
   });
   $("#lookupCode").addEventListener("input", event => { event.target.value = event.target.value.toUpperCase().replace(/[^A-Z0-9-]/g, "").slice(0, 8); });
-  elements.lookupForm.addEventListener("submit", event => {
+  elements.lookupForm.addEventListener("submit", async event => {
     event.preventDefault();
-    const booking = lookupBooking($("#lookupPhone").value, $("#lookupCode").value);
+    const phone = $("#lookupPhone").value;
+    const code = $("#lookupCode").value;
+    elements.lookupResult.innerHTML = '<div class="empty-state"><strong>Consultando...</strong><p>Buscando seu agendamento na agenda online.</p></div>';
+    let booking = lookupBooking(phone, code);
+    if (!booking && window.LegadoSupabase?.lookupBooking) {
+      try { booking = await window.LegadoSupabase.lookupBooking(phone, code); }
+      catch (error) { showToast("Não foi possível consultar o Supabase.", true); }
+    }
     if (!booking) {
-      elements.lookupResult.innerHTML = '<div class="empty-state"><strong>Agendamento não encontrado</strong><p>Confira o WhatsApp e o código. Nesta versão, a consulta funciona apenas no aparelho usado para agendar.</p></div>';
+      elements.lookupResult.innerHTML = '<div class="empty-state"><strong>Agendamento não encontrado</strong><p>Confira o WhatsApp e o código informado.</p></div>';
       return;
     }
     renderLookup(booking);
@@ -1001,7 +1106,12 @@
   if (query.get("telefone") && query.get("codigo")) {
     $("#lookupPhone").value = L.formatPhone(query.get("telefone"));
     $("#lookupCode").value = query.get("codigo").toUpperCase();
-    const found = lookupBooking(query.get("telefone"), query.get("codigo"));
-    if (found) renderLookup(found);
+    (async () => {
+      let found = lookupBooking(query.get("telefone"), query.get("codigo"));
+      if (!found && window.LegadoSupabase?.lookupBooking) {
+        try { found = await window.LegadoSupabase.lookupBooking(query.get("telefone"), query.get("codigo")); } catch {}
+      }
+      if (found) renderLookup(found);
+    })();
   }
 })();

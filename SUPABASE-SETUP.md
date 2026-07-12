@@ -1,33 +1,60 @@
-# Preparação do Supabase — Legado Barbearia
+# Conexão do Supabase — Legado Barbearia
 
-O projeto continua funcionando sem Supabase. Estes arquivos deixam a próxima integração organizada:
+A integração já está preparada no site. Para ativá-la no projeto publicado, siga esta ordem.
 
-- `supabase-schema.sql`: tabelas, índices, RLS e funções iniciais.
-- `supabase-config.example.js`: modelo para URL e chave pública.
-- Backup JSON do painel: será a fonte para migrar os dados locais.
+## 1. Atualize o banco
 
-## Dados que serão necessários
+No painel do Supabase, abra **SQL Editor**, crie uma nova consulta e execute todo o conteúdo de:
 
-1. URL do projeto Supabase.
-2. Chave `anon` ou `publishable` pública.
-3. E-mail que será usado como proprietário do painel.
+- `supabase-fix.sql` para corrigir um projeto que já possui as tabelas; ou
+- `supabase-schema.sql` para uma instalação completa.
 
-Nunca envie nem coloque a chave `service_role` dentro do site.
+Depois execute `supabase-seed.sql` para cadastrar as configurações e serviços iniciais.
 
-## Ordem da integração
+## 2. Crie o usuário administrador
 
-1. Executar `supabase-schema.sql` no SQL Editor.
-2. Criar o usuário proprietário no Supabase Auth.
-3. Renomear `supabase-config.example.js` para `supabase-config.js` e inserir as credenciais públicas.
-4. Substituir o armazenamento local pelo adaptador Supabase.
-5. Migrar serviços, horários, portfólio, avaliações e agendamentos usando o backup JSON.
-6. Testar conflitos de horário, login, consulta por código e políticas RLS.
-7. Publicar em HTTPS.
+No Supabase, abra **Authentication → Users → Add user** e crie o usuário que entrará no painel administrativo.
 
-## Cuidados antes da produção
+Use o mesmo e-mail e a mesma senha na página `admin.html`.
 
-- A criação pública de agendamentos deve receber validação contra conflitos no servidor.
-- Recomenda-se usar Edge Function ou RPC para agendar, cancelar e reagendar.
-- Adicionar proteção contra spam, limite de requisições e, se necessário, CAPTCHA.
-- As fotos do portfólio devem ser enviadas ao Supabase Storage e salvas no banco somente como URL.
-- Revisar as políticas RLS com dados de teste antes de receber clientes reais.
+## 3. Confira a configuração pública
+
+O arquivo `supabase-config.js` deve conter:
+
+```js
+window.LEGADO_SUPABASE = {
+  url: "https://SEU-PROJETO.supabase.co",
+  anonKey: "SUA_CHAVE_PUBLISHABLE_OU_ANON"
+};
+```
+
+A chave `publishable`/`anon` pode ficar no navegador. Nunca coloque a chave `service_role` ou `secret` no site.
+
+## 4. Publique todos os arquivos
+
+Envie novamente, principalmente:
+
+- `index.html`
+- `admin.html`
+- `app.js`
+- `admin.js`
+- `supabase-bridge.js`
+- `supabase-config.js`
+- `sw.js`
+
+O Service Worker recebeu uma nova versão. Depois da publicação, atualize a página com **Ctrl + F5** ou limpe os dados do site uma vez para remover o cache antigo.
+
+## 5. Como verificar
+
+Abra `admin.html`. No topo deve aparecer **Supabase conectado**.
+
+Caso apareça **Supabase desconectado**:
+
+1. confira a URL e a chave em `supabase-config.js`;
+2. confirme que `supabase-fix.sql` foi executado sem erros;
+3. confirme que o usuário foi criado em Authentication;
+4. abra o Console do navegador para ver a mensagem detalhada.
+
+## Correção aplicada
+
+A chave nova do Supabase começa com `sb_publishable_`. Ela deve ser enviada no cabeçalho `apikey`. O código antigo também a enviava como `Authorization: Bearer`, o que podia causar erro de JWT e impedir toda a conexão. O novo `supabase-bridge.js` envia o token de usuário no cabeçalho `Authorization` somente depois do login.

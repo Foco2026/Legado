@@ -13,6 +13,17 @@
   let calendarMode = "day";
   let currentPortfolioGallery = [];
 
+  function renderSupabaseStatus(state = window.LegadoSupabase?.getConnectionState?.()) {
+    const element = $("#supabaseConnectionStatus");
+    if (!element || !state) return;
+    element.classList.remove("is-connected", "is-error", "is-checking");
+    element.classList.add(state.status === "connected" ? "is-connected" : state.status === "checking" ? "is-checking" : "is-error");
+    element.textContent = state.status === "connected" ? "Supabase conectado" : state.status === "checking" ? "Verificando Supabase" : "Supabase desconectado";
+    element.title = state.error || state.message || "";
+  }
+
+  window.addEventListener("legado:supabase-status", event => renderSupabaseStatus(event.detail));
+
   function getCredentials() {
     return L.loadRaw(L.KEYS.credentials, null);
   }
@@ -96,7 +107,8 @@
     $("#logoutButton").classList.remove("hidden");
     $("#openAdminTutorial").classList.remove("hidden");
     const credentials = getCredentials();
-    $("#adminNameLabel").textContent = credentials?.name || "Administrador";
+    const remoteEmail = window.LegadoSupabase?.readSession?.()?.user?.email || "";
+    $("#adminNameLabel").textContent = credentials?.name || remoteEmail.split("@")[0] || "Administrador";
     $("#todayLabel").textContent = new Date().toLocaleDateString("pt-BR", { weekday: "long", day: "2-digit", month: "long" });
     refreshAll();
     if (localStorage.getItem("legadoAdminTutorialSeen") !== "1") openPanel("tutorial");
@@ -132,6 +144,8 @@
       showAuthMessage("Conectando ao Supabase...");
       const remote = await window.LegadoSupabase.signIn(email, password);
       if (remote.ok) { sessionStorage.setItem(L.KEYS.session, "active"); showAuthMessage(""); showAdmin(); return; }
+      const hasValidLocalFallback = credentials && email === String(credentials.email).toLowerCase() && await hashPassword(password) === credentials.passwordHash;
+      if (!hasValidLocalFallback) return showAuthMessage(`Supabase: ${remote.error || "não foi possível entrar."}`, true);
     }
     const passwordHash = await hashPassword(password);
     if (!credentials || email !== String(credentials.email).toLowerCase() || passwordHash !== credentials.passwordHash) return showAuthMessage("E-mail ou senha incorretos.", true);
@@ -975,5 +989,7 @@ Salvar este agendamento como confirmado e cancelar as concorrentes?`)) return;
   window.addEventListener("legado:datachange", refreshAll);
 
   buildWeekdayRows(); resetPortfolioForm(); resetTestimonialForm(); configureAuthView();
-  if (getCredentials() && sessionStorage.getItem(L.KEYS.session) === "active") showAdmin();
+  renderSupabaseStatus();
+  window.LegadoSupabase?.testConnection?.().then(result => renderSupabaseStatus(result.state)).catch(() => {});
+  if (sessionStorage.getItem(L.KEYS.session) === "active" && (getCredentials() || window.LegadoSupabase?.accessToken?.())) showAdmin();
 })();

@@ -1015,3 +1015,14 @@
     border:1px solid rgba(255,255,255,.11)!important;
   }
 }
+
+/* Estado da conexão com o Supabase */
+.supabase-connection-status{display:inline-flex;align-items:center;gap:7px;border:1px solid rgba(255,255,255,.12);border-radius:999px;padding:7px 10px;font-size:7px;letter-spacing:.08em;text-transform:uppercase;color:#c8d1d8;background:rgba(255,255,255,.025);white-space:nowrap}
+.supabase-connection-status:before{content:"";width:7px;height:7px;border-radius:50%;background:#8b98a3}
+.supabase-connection-status.is-connected{color:#9ee2b7;border-color:rgba(107,196,142,.35);background:rgba(107,196,142,.08)}
+.supabase-connection-status.is-connected:before{background:#6bc48e;box-shadow:0 0 0 4px rgba(107,196,142,.1)}
+.supabase-connection-status.is-error{color:#efbfbc;border-color:rgba(223,109,103,.35);background:rgba(223,109,103,.07)}
+.supabase-connection-status.is-error:before{background:#df6d67}
+.supabase-connection-status.is-checking:before{background:#d6b750;animation:supabasePulse 1.2s ease-in-out infinite}
+@keyframes supabasePulse{50%{opacity:.35;transform:scale(.75)}}
+@media(max-width:850px){.supabase-connection-status{display:none}}

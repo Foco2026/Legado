@@ -1,6 +1,6 @@
-// Renomeie este arquivo para supabase-config.js quando as credenciais forem fornecidas.
-// Nunca coloque a service_role key no navegador.
+// Copie este arquivo para supabase-config.js e informe as credenciais públicas.
+// Nunca coloque uma chave secret ou service_role no navegador.
 window.LEGADO_SUPABASE = {
   url: "https://SEU-PROJETO.supabase.co",
-  anonKey: "SUA_CHAVE_ANON_PUBLICA"
+  anonKey: "SUA_CHAVE_PUBLISHABLE_OU_ANON"
 };
